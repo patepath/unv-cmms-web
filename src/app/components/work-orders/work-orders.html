@@ -1,0 +1,108 @@
+<div class="work-orders-page">
+  <section class="workspace-grid">
+    <form class="request-panel" [formGroup]="requestForm" (ngSubmit)="createWorkOrder()">
+      <div class="panel-heading">
+        <div>
+          <p class="section-kicker">New request</p>
+          <h3>Create work order</h3>
+        </div>
+        <span class="plus-mark" aria-hidden="true">+</span>
+      </div>
+
+      <label>
+        Request title
+        <input formControlName="title" placeholder="e.g. Check motor overheating" />
+      </label>
+      @if (requestForm.controls.title.invalid && requestForm.controls.title.touched) {
+        <small class="field-error">Add a title for this request.</small>
+      }
+
+      <label>
+        Asset or location
+        <input formControlName="asset" placeholder="e.g. Pump 04 / Building B" />
+      </label>
+      @if (requestForm.controls.asset.invalid && requestForm.controls.asset.touched) {
+        <small class="field-error">Add an asset or location.</small>
+      }
+
+      <div class="form-row">
+        <label>
+          Priority
+          <select formControlName="priority">
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </label>
+        <label>
+          Assign to
+          <select formControlName="assignee">
+            @for (technician of technicians; track technician) {
+              <option [value]="technician">{{ technician }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <button class="create-button" type="submit">
+        Create request <span aria-hidden="true">→</span>
+      </button>
+    </form>
+
+    <section class="list-panel" aria-labelledby="request-list-title">
+      <div class="list-heading">
+        <div>
+          <p class="section-kicker">Live queue</p>
+          <h3 id="request-list-title">Maintenance requests</h3>
+        </div>
+        <span class="queue-count">{{ filteredWorkOrders().length }}</span>
+      </div>
+
+      <div class="status-tabs" role="tablist" aria-label="Filter work orders">
+        @for (status of statuses; track status) {
+          <button
+            type="button"
+            role="tab"
+            [class.selected]="selectedStatus() === status"
+            [attr.aria-selected]="selectedStatus() === status"
+            (click)="setStatus(status)"
+          >
+            {{ status }}
+          </button>
+        }
+      </div>
+
+      <div class="request-list">
+        @for (workOrder of filteredWorkOrders(); track workOrder.id) {
+          <article class="request-card">
+            <div class="request-card-main">
+              <div class="request-id-row">
+                <span class="request-id">{{ workOrder.id }}</span>
+                <span class="priority" [class]="workOrder.priority.toLowerCase()">{{
+                  workOrder.priority
+                }}</span>
+              </div>
+              <h4>{{ workOrder.title }}</h4>
+              <p class="asset-name">{{ workOrder.asset }}</p>
+              <p class="request-meta">Created {{ workOrder.created }} · {{ workOrder.assignee }}</p>
+            </div>
+            <div class="request-card-side">
+              <span class="status" [class]="workOrder.status.toLowerCase().replace(' ', '-')">{{
+                workOrder.status
+              }}</span>
+              @if (workOrder.status !== 'Completed') {
+                <button type="button" class="advance-button" (click)="advanceStatus(workOrder.id)">
+                  Advance <span aria-hidden="true">→</span>
+                </button>
+              } @else {
+                <span class="complete-mark" aria-label="Completed">✓</span>
+              }
+            </div>
+          </article>
+        } @empty {
+          <p class="empty-state">No work orders match this status.</p>
+        }
+      </div>
+    </section>
+  </section>
+</div>

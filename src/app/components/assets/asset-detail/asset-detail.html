@@ -1,0 +1,67 @@
+<aside class="asset-detail" aria-labelledby="asset-detail-title">
+  <div class="detail-header">
+    <div class="large-asset-symbol" aria-hidden="true">
+      {{ asset().category.name === 'HVAC' ? '◌' : '▦' }}
+    </div>
+
+    <!--
+    <span class="condition" [class]="asset().condition.toLowerCase().replace(' ', '-')">
+      {{ asset().condition }}
+    </span>
+    -->
+  </div>
+
+  <div class="detail-actions">
+    <button type="button" (click)="editRequested.emit(asset())">Edit</button>
+    <button type="button" class="delete-button" (click)="deleteRequested.emit(asset())">
+      Delete
+    </button>
+  </div>
+
+  <p class="section-kicker">{{ asset().id }}</p>
+  <h3 id="asset-detail-title">{{ asset().tag }}</h3>
+  <p class="detail-category">{{ asset().category }}</p>
+
+  <dl class="asset-facts">
+    <div>
+      <dt>Location</dt>
+      <dd>{{ asset().location }}</dd>
+    </div>
+
+    <div>
+      <dt>Owner</dt>
+      <dd>{{ asset().owner }}</dd>
+    </div>
+
+    <div>
+      <dt>Last service</dt>
+      <dd>{{ asset().last_service }}</dd>
+    </div>
+
+    <div>
+      <dt>Next service</dt>
+      <dd>{{ asset().next_service }}</dd>
+    </div>
+
+  </dl>
+
+  <div class="history-heading">
+    <h4>Service history</h4>
+    <span>{{ asset().service_records.length }} records</span>
+  </div>
+
+  <div class="history-list">
+    @for (record of asset().service_records; track record.date + record.task) {
+      <div class="history-record">
+        <span class="history-dot" aria-hidden="true"></span>
+
+        <div>
+          <strong>{{ record.task }}</strong
+          ><small>{{ record.date }} · {{ record.technician }}</small>
+        </div>
+      </div>
+    } @empty {
+      <p class="empty-history">No service records yet.</p>
+    }
+  </div>
+</aside>

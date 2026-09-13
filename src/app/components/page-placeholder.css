@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.page-placeholder {
+  max-width: 680px;
+  padding: 40px;
+  border: 1px solid #dfe7e1;
+  border-radius: 16px;
+  background: #fbfcfa;
+}
+
+.page-kicker {
+  margin: 0 0 12px;
+  color: #fa4616;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h2 {
+  margin: 0 0 12px;
+  color: #17231f;
+  font-size: 32px;
+}
+
+.page-placeholder p:last-child {
+  margin: 0;
+  color: #73817b;
+  line-height: 1.6;
+}

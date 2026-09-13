@@ -1,0 +1,103 @@
+<div class="preventive-page">
+  <section class="page-intro">
+    <div>
+      <p class="page-kicker">Scheduled care</p>
+      <h2>Preventive maintenance</h2>
+      <p>Plan recurring service tasks before equipment issues become disruptions.</p>
+    </div>
+    <div class="summary-chip">
+      <strong>{{ upcomingCount() }}</strong> upcoming plans
+    </div>
+  </section>
+
+  <section class="planning-grid">
+    <form class="plan-panel" [formGroup]="planForm" (ngSubmit)="createPlan()">
+      <div class="panel-heading">
+        <div>
+          <p class="section-kicker">New schedule</p>
+          <h3>Create maintenance plan</h3>
+        </div>
+        <span class="calendar-mark" aria-hidden="true">↗</span>
+      </div>
+
+      <label>
+        Service task
+        <input formControlName="task" placeholder="e.g. Inspect safety guards" />
+      </label>
+      @if (planForm.controls.task.invalid && planForm.controls.task.touched) {
+        <small class="field-error">Add a recurring service task.</small>
+      }
+
+      <label>
+        Asset or location
+        <input formControlName="asset" placeholder="e.g. Generator 02 / Building B" />
+      </label>
+      @if (planForm.controls.asset.invalid && planForm.controls.asset.touched) {
+        <small class="field-error">Add an asset or location.</small>
+      }
+
+      <div class="form-row">
+        <label>
+          Repeat every
+          <select formControlName="cadence">
+            @for (cadence of cadences; track cadence) {
+              <option [value]="cadence">{{ cadence }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Next service
+          <input formControlName="nextService" type="date" />
+        </label>
+      </div>
+
+      <label>
+        Assign technician
+        <select formControlName="assignee">
+          @for (technician of technicians; track technician) {
+            <option [value]="technician">{{ technician }}</option>
+          }
+        </select>
+      </label>
+
+      <button class="create-button" type="submit">
+        Add to schedule <span aria-hidden="true">→</span>
+      </button>
+    </form>
+
+    <section class="schedule-panel" aria-labelledby="schedule-title">
+      <div class="list-heading">
+        <div>
+          <p class="section-kicker">Maintenance calendar</p>
+          <h3 id="schedule-title">Upcoming service plans</h3>
+        </div>
+        <span class="plan-count">{{ plans().length }}</span>
+      </div>
+
+      <div class="schedule-list">
+        @for (plan of plans(); track plan.id) {
+          <article class="plan-card">
+            <div class="date-block" aria-label="Next service date">
+              <span>{{ plan.nextService.split(' ')[0] }}</span>
+              <small>{{ plan.nextService.split(' ')[1] }}</small>
+            </div>
+            <div class="plan-details">
+              <div class="plan-id-row">
+                <span class="plan-id">{{ plan.id }}</span>
+                <span class="status" [class]="plan.status.toLowerCase().replace(' ', '-')">{{
+                  plan.status
+                }}</span>
+              </div>
+              <h4>{{ plan.task }}</h4>
+              <p>{{ plan.asset }}</p>
+              <div class="plan-meta">
+                <span>{{ plan.cadence }}</span>
+                <span>Assigned to {{ plan.assignee }}</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  </section>
+</div>

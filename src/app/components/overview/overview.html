@@ -1,0 +1,126 @@
+<div class="overview-page">
+  <section class="metric-grid" aria-label="Maintenance summary">
+    <article class="metric-card">
+      <span class="metric-label">Open work orders</span>
+      <strong>18</strong>
+      <span class="metric-change positive">↓ 12% this week</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Asset availability</span>
+      <strong>94.2%</strong>
+      <span class="metric-change positive">↑ 2.4% this month</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Due this week</span>
+      <strong>12</strong>
+      <span class="metric-change neutral">4 high priority</span>
+    </article>
+  </section>
+
+  <section class="chart-grid" aria-label="Maintenance charts">
+    <article class="chart-card work-order-chart">
+      <div class="chart-heading">
+        <div>
+          <p class="section-kicker">Work orders</p>
+          <h3>Status distribution</h3>
+        </div>
+        <span class="chart-total">100 total</span>
+      </div>
+      <div class="donut-layout">
+        <div
+          class="donut-chart"
+          role="img"
+          aria-label="58 percent completed, 24 percent in progress, 18 percent open"
+        >
+          <svg viewBox="0 0 42 42" aria-hidden="true">
+            <circle class="donut-track" cx="21" cy="21" r="15.9155" />
+            @for (slice of workOrderSlices; track slice.label) {
+              <circle
+                class="donut-segment"
+                cx="21"
+                cy="21"
+                r="15.9155"
+                [attr.stroke]="slice.color"
+                [attr.stroke-dasharray]="slice.dashArray"
+                [attr.stroke-dashoffset]="slice.dashOffset"
+              />
+            }
+          </svg>
+          <strong>58<small>%</small></strong>
+        </div>
+        <div class="legend">
+          @for (slice of workOrderSlices; track slice.label) {
+            <div class="legend-row">
+              <span class="legend-dot" [style.background-color]="slice.color"></span>
+              <span>{{ slice.label }}</span>
+              <strong>{{ slice.value }}%</strong>
+            </div>
+          }
+        </div>
+      </div>
+    </article>
+
+    <article class="chart-card health-chart">
+      <div class="chart-heading">
+        <div>
+          <p class="section-kicker">Asset health</p>
+          <h3>Equipment condition</h3>
+        </div>
+        <span class="chart-total">204 assets</span>
+      </div>
+      <div class="health-bars">
+        @for (metric of assetHealth; track metric.label) {
+          <div class="health-row">
+            <div class="health-label">
+              <span>{{ metric.label }}</span
+              ><strong>{{ metric.value }}%</strong>
+            </div>
+            <div class="bar-track">
+              <span [style.width.%]="metric.value" [style.background-color]="metric.color"></span>
+            </div>
+          </div>
+        }
+      </div>
+      <p class="chart-note">Availability remains above the 90% operating target.</p>
+    </article>
+
+    <article class="chart-card trend-chart-card">
+      <div class="chart-heading">
+        <div>
+          <p class="section-kicker">Upcoming maintenance</p>
+          <h3>Scheduled service volume</h3>
+        </div>
+        <span class="trend-value">72 <small>planned</small></span>
+      </div>
+      <div
+        class="line-chart"
+        role="img"
+        aria-label="Scheduled maintenance volume rising from April to October"
+      >
+        <svg viewBox="0 0 700 210" preserveAspectRatio="none" aria-hidden="true">
+          <line class="grid-line" x1="0" y1="35" x2="700" y2="35" />
+          <line class="grid-line" x1="0" y1="95" x2="700" y2="95" />
+          <line class="grid-line" x1="0" y1="155" x2="700" y2="155" />
+          <polyline
+            class="trend-area"
+            points="0,133 116,103 233,119 350,76 466,94 583,45 700,60 700,190 0,190"
+          />
+          <polyline class="trend-line" points="0,133 116,103 233,119 350,76 466,94 583,45 700,60" />
+          @for (point of maintenanceTrend; track point; let index = $index) {
+            <circle
+              class="trend-point"
+              [attr.cx]="index * 116.66"
+              [attr.cy]="190 - (point - 30) * 2.42"
+              r="4"
+            />
+          }
+        </svg>
+        <div class="axis-labels">
+          @for (label of maintenanceLabels; track label) {
+            <span>{{ label }}</span>
+          }
+        </div>
+      </div>
+    </article>
+  </section>
+</div>

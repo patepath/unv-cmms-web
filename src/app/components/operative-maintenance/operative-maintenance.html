@@ -1,0 +1,116 @@
+<div class="operative-page">
+  <section class="page-intro">
+    <div>
+      <p class="page-kicker">Active response</p>
+      <h2>Operative maintenance</h2>
+      <p>Coordinate urgent repairs and restore equipment to working condition.</p>
+    </div>
+    <div class="summary-chip">
+      <strong>{{ activeIncidentCount() }}</strong> active incidents
+    </div>
+  </section>
+
+  <section class="response-grid">
+    <form class="incident-panel" [formGroup]="repairForm" (ngSubmit)="reportIncident()">
+      <div class="panel-heading">
+        <div>
+          <p class="section-kicker">Rapid response</p>
+          <h3>Report equipment issue</h3>
+        </div>
+        <span class="alert-mark" aria-hidden="true">!</span>
+      </div>
+
+      <label>
+        Asset or location
+        <input formControlName="asset" placeholder="e.g. Chiller 01 / Building A" />
+      </label>
+      @if (repairForm.controls.asset.invalid && repairForm.controls.asset.touched) {
+        <small class="field-error">Add the affected asset or location.</small>
+      }
+
+      <label>
+        What needs attention?
+        <input formControlName="issue" placeholder="e.g. Motor has stopped unexpectedly" />
+      </label>
+      @if (repairForm.controls.issue.invalid && repairForm.controls.issue.touched) {
+        <small class="field-error">Describe the equipment issue.</small>
+      }
+
+      <div class="form-row">
+        <label>
+          Urgency
+          <select formControlName="urgency">
+            <option>Critical</option>
+            <option>High</option>
+            <option>Medium</option>
+          </select>
+        </label>
+        <label>
+          Operational impact
+          <select formControlName="impact">
+            <option>Production stopped</option>
+            <option>Reduced capacity</option>
+            <option>Manual operation</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        Assign technician
+        <select formControlName="technician">
+          @for (technician of technicians; track technician) {
+            <option [value]="technician">{{ technician }}</option>
+          }
+        </select>
+      </label>
+
+      <button class="report-button" type="submit">
+        Start repair response <span aria-hidden="true">→</span>
+      </button>
+    </form>
+
+    <section class="incident-panel queue-panel" aria-labelledby="incident-queue-title">
+      <div class="list-heading">
+        <div>
+          <p class="section-kicker">Repair queue</p>
+          <h3 id="incident-queue-title">Equipment incidents</h3>
+        </div>
+        <span class="incident-count">{{ incidents().length }}</span>
+      </div>
+
+      <div class="incident-list">
+        @for (incident of incidents(); track incident.id) {
+          <article class="incident-card">
+            <div class="incident-icon" [class]="incident.urgency.toLowerCase()" aria-hidden="true">
+              {{ incident.urgency === 'Critical' ? '!' : '↗' }}
+            </div>
+            <div class="incident-details">
+              <div class="incident-id-row">
+                <span class="incident-id">{{ incident.id }}</span>
+                <span class="urgency" [class]="incident.urgency.toLowerCase()">{{
+                  incident.urgency
+                }}</span>
+              </div>
+              <h4>{{ incident.issue }}</h4>
+              <p class="asset-name">{{ incident.asset }}</p>
+              <p class="incident-meta">{{ incident.impact }} · Reported {{ incident.reported }}</p>
+            </div>
+            <div class="incident-actions">
+              <span class="status" [class]="incident.status.toLowerCase()">{{
+                incident.status
+              }}</span>
+              @if (incident.status !== 'Restored') {
+                <button type="button" class="advance-button" (click)="advanceRepair(incident.id)">
+                  {{ incident.status === 'Repairing' ? 'Restore' : 'Advance' }}
+                  <span aria-hidden="true">→</span>
+                </button>
+              } @else {
+                <span class="restored-mark" aria-label="Equipment restored">✓ Restored</span>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  </section>
+</div>

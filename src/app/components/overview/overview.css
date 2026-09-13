@@ -1,0 +1,309 @@
+:host {
+  display: block;
+  color: #17231f;
+}
+
+.overview-page {
+  max-width: 1280px;
+}
+
+.page-intro,
+.chart-heading,
+.health-label,
+.legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-intro {
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.page-kicker,
+.section-kicker {
+  margin: 0 0 8px;
+  color: #fa4616;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h2 {
+  margin-bottom: 8px;
+  font-size: clamp(28px, 4vw, 42px);
+  letter-spacing: -0.03em;
+}
+
+.page-intro p:last-child {
+  margin-bottom: 0;
+  color: #73817b;
+}
+
+.updated-label,
+.chart-total,
+.chart-note {
+  color: #9aa69f;
+  font-size: 11px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.metric-card,
+.chart-card {
+  border: 1px solid #dfe7e1;
+  border-radius: 14px;
+  background: #fbfcfa;
+}
+
+.metric-card {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+}
+
+.metric-label {
+  color: #73817b;
+  font-size: 11px;
+}
+
+.metric-card > strong {
+  font-size: 28px;
+  letter-spacing: -0.03em;
+}
+
+.metric-change {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.metric-change.positive {
+  color: #4a7739;
+}
+
+.metric-change.neutral {
+  color: #d09a22;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.chart-card {
+  min-width: 0;
+  padding: 22px;
+}
+
+.trend-chart-card {
+  grid-column: 1 / -1;
+}
+
+.chart-heading {
+  margin-bottom: 24px;
+}
+
+h3 {
+  margin-bottom: 0;
+  font-size: 18px;
+}
+
+.donut-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 24px;
+  min-height: 190px;
+}
+
+.donut-chart {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  flex: 0 0 160px;
+}
+
+.donut-chart svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-track,
+.donut-segment {
+  fill: none;
+  stroke-width: 4;
+}
+
+.donut-track {
+  stroke: #e7ece8;
+}
+
+.donut-segment {
+  stroke-linecap: butt;
+}
+
+.donut-chart > strong {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  font-size: 30px;
+}
+
+.donut-chart > strong small {
+  display: inline;
+  font-size: 14px;
+}
+
+.legend {
+  display: grid;
+  min-width: 145px;
+  gap: 16px;
+}
+
+.legend-row {
+  justify-content: flex-start;
+  gap: 8px;
+  color: #73817b;
+  font-size: 11px;
+}
+
+.legend-row strong {
+  margin-left: auto;
+  color: #17231f;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+}
+
+.health-bars {
+  display: grid;
+  gap: 22px;
+  margin: 18px 0 28px;
+}
+
+.health-label {
+  margin-bottom: 8px;
+  color: #4e5c56;
+  font-size: 11px;
+}
+
+.health-label strong {
+  color: #17231f;
+}
+
+.bar-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7ece8;
+}
+
+.bar-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.chart-note {
+  margin-bottom: 0;
+}
+
+.trend-value {
+  color: #fa4616;
+  font-size: 24px;
+  font-weight: 750;
+}
+
+.trend-value small {
+  color: #9aa69f;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.line-chart {
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.line-chart svg {
+  display: block;
+  width: 100%;
+  height: 210px;
+}
+
+.grid-line {
+  stroke: #e7ece8;
+  stroke-dasharray: 4 5;
+  stroke-width: 1;
+}
+
+.trend-area {
+  fill: rgb(250 70 22 / 10%);
+  stroke: none;
+}
+
+.trend-line {
+  fill: none;
+  stroke: #fa4616;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.trend-point {
+  fill: white;
+  stroke: #fa4616;
+  stroke-width: 3;
+}
+
+.axis-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+  color: #9aa69f;
+  font-size: 10px;
+}
+
+@media (max-width: 760px) {
+  .metric-grid,
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trend-chart-card {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .page-intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .donut-layout {
+    flex-direction: column;
+  }
+}

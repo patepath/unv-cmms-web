@@ -1,0 +1,141 @@
+<div class="assets-page">
+  <section class="page-intro">
+    <div></div>
+
+    <div class="intro-actions">
+      <div class="summary-chip">
+        <span aria-hidden="true">พบ </span>
+        <strong>{{ assets().length }}</strong>
+        <span aria-hidden="true"> ครุภัณฑ์</span>
+      </div>
+
+      <button class="add-button" type="button" (click)="openCreateForm()">
+        <span aria-hidden="true">+</span> เพิ่มครุภัณฑ์
+      </button>
+    </div>
+  </section>
+
+  <section class="asset-toolbar" aria-label="Asset filters">
+    <label class="search-field">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <span class="sr-only">ค้นหาครุภัณฑ์</span>
+      <input
+        type="search"
+        placeholder="Search by equipment, ID, owner..."
+        [value]="searchTerm()"
+        (input)="updateSearch($event)"
+      />
+    </label>
+
+    <div class="location-filters" role="tablist" aria-label="Filter by location">
+      @for (location of locations; track location) {
+        <button
+          type="button"
+          role="tab"
+          [class.selected]="selectedLocation() === location"
+          [attr.aria-selected]="selectedLocation() === location"
+          (click)="selectLocation(location)"
+        >
+          {{ location }}
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (isFormOpen()) {
+    <app-asset-management
+      [asset]="editingAsset()"
+      [error]="formError()"
+      (saved)="saveAsset($event)"
+      (cancelled)="closeForm()"
+    />
+  }
+
+  <section class="asset-layout">
+    <div class="asset-list" aria-label="Equipment list">
+      <div class="list-heading">
+        <div>
+          <p class="section-kicker">รายการครุภัณฑ์</p>
+        </div>
+
+        <span class="asset-count">แสดง {{ filteredAssets().length }} รายการ</span>
+      </div>
+
+      <div class="asset-cards">
+        @for (asset of filteredAssets(); track asset.id) {
+          <button
+            type="button"
+            class="asset-card"
+            [class.selected]="selectedAsset()?.id === asset.id"
+            [attr.aria-pressed]="selectedAsset()?.id === asset.id"
+            (click)="selectAsset(asset)"
+          >
+            <span class="asset-symbol" aria-hidden="true">{{
+              asset.category.name === 'HVAC' ? '◌' : '▦'
+            }}</span>
+            <span class="asset-card-copy">
+              <!--
+              <span class="asset-card-topline">
+                <strong>{{ asset.name }}</strong>
+                <span class="condition" [class]="asset.condition.toLowerCase().replace(' ', '-')">{{
+                  asset.condition
+                }}</span>
+              </span>
+              -->
+              <span class="asset-id">{{ asset.id }} · {{ asset.category }}</span>
+              <span class="asset-location">{{ asset.location }} · Owned by {{ asset.owner }}</span>
+            </span>
+            <span class="asset-arrow" aria-hidden="true">→</span>
+          </button>
+        } @empty {
+          <p class="empty-state">ไม่พบครุภัณฑ์ที่ตรงกับการค้นหาของคุณ</p>
+        }
+      </div>
+
+      <nav class="pagination" aria-label="Asset pages">
+        <button
+          type="button"
+          class="page-button page-arrow"
+          aria-label="Previous page"
+          [disabled]="currentPage() === 1"
+          (click)="previousPage()"
+        >
+          ←
+        </button>
+        @for (page of pageNumbers(); track page) {
+          <button
+            type="button"
+            class="page-button"
+            [class.selected]="currentPage() === page"
+            [attr.aria-current]="currentPage() === page ? 'page' : null"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        }
+        <button
+          type="button"
+          class="page-button page-arrow"
+          aria-label="Next page"
+          [disabled]="currentPage() === totalPages()"
+          (click)="nextPage()"
+        >
+          →
+        </button>
+      </nav>
+    </div>
+
+    @if (selectedAsset(); as asset) {
+      <app-asset-detail
+        [asset]="asset"
+        (editRequested)="openEditForm($event)"
+        (deleteRequested)="deleteAsset($event)"
+      />
+    } @else {
+      <aside class="asset-detail empty-detail">
+        <h3>เลือกครุภัณฑ์</h3>
+        <p>เลือกครุภัณฑ์เพื่อดูเจ้าของ, สถานที่ตั้ง, และประวัติการบำรุงรักษา</p>
+      </aside>
+    }
+  </section>
+</div>

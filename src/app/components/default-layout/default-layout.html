@@ -1,0 +1,118 @@
+<div class="layout-shell" [class.sidebar-collapsed]="isSidebarCollapsed()">
+  <aside
+    class="sidebar"
+    [attr.aria-label]="isSidebarCollapsed() ? 'Collapsed navigation' : 'Main navigation'"
+  >
+    <div class="brand-row">
+      <a class="brand" href="/" aria-label="CMMS home">
+        <img class="brand-logo" src="/kmutt-logo.png" alt="" aria-hidden="true" />
+        @if (!isSidebarCollapsed()) {
+          <span class="brand-name">KMUTT CMMS</span>
+        }
+      </a>
+      <button
+        class="collapse-button"
+        type="button"
+        [attr.aria-label]="isSidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+        [attr.aria-expanded]="!isSidebarCollapsed()"
+        (click)="toggleSidebar()"
+      >
+        <svg class="collapse-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m14 6-6 6 6 6M19 6l-6 6 6 6" />
+        </svg>
+      </button>
+    </div>
+
+    <nav class="menu" aria-label="Primary">
+      @for (item of menuItems; track item.label) {
+        <button
+          routerLinkActive="active"
+          [routerLink]="['/admin', item.path]"
+          class="menu-item"
+          type="button"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          [attr.title]="isSidebarCollapsed() ? item.label : null"
+          (click)="selectMenuItem(item.label)"
+        >
+          @switch (item.icon) {
+            @case ('overview') {
+              <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="4" width="6" height="6" rx="1" />
+                <rect x="14" y="4" width="6" height="6" rx="1" />
+                <rect x="4" y="14" width="6" height="6" rx="1" />
+                <rect x="14" y="14" width="6" height="6" rx="1" />
+              </svg>
+            }
+            @case ('work-orders') {
+              <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 4h10v16H7zM9 8h6M9 12h6M9 16h4" />
+              </svg>
+            }
+            @case ('assets') {
+              <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m14 5 5 5-4 4-5-5 4-4ZM8 11l5 5-4 4-5-5 4-4ZM5 19l-2 2M17 7l2-2" />
+              </svg>
+            }
+            @case ('maintenance') {
+              <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m14 6 4-4 4 4-4 4M18 6 9 15M6 18l-2 2M4 14l6 6" />
+              </svg>
+            }
+            @case ('operative-maintenance') {
+              <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m14 5 5 5M12 7l5 5M8 16l8-8M5 19l3-3" />
+                <path
+                  d="M17 3a4 4 0 0 0-1 5l-8 8a4 4 0 0 0-5 1l3 3a4 4 0 0 0 1-5l8-8a4 4 0 0 0 5-1Z"
+                />
+              </svg>
+            }
+            @case ('reports') {
+              <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 20V10M12 20V4M19 20v-7" />
+                <path d="M3 20h18" />
+              </svg>
+            }
+          }
+          @if (!isSidebarCollapsed()) {
+            <span>{{ item.label }}</span>
+          }
+        </button>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <button
+        class="profile-button"
+        type="button"
+        [attr.title]="isSidebarCollapsed() ? 'Patipat S.' : null"
+      >
+        <span class="avatar" aria-hidden="true">PS</span>
+        @if (!isSidebarCollapsed()) {
+          <span class="profile-copy">
+            <strong>Patipat S.</strong>
+            <small>Administrator</small>
+          </span>
+          <span class="profile-more" aria-hidden="true">...</span>
+        }
+      </button>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Maintenance operations</p>
+        <h1>{{ activeMenuItem() }}</h1>
+      </div>
+      <button class="notification-button" type="button" aria-label="View notifications">
+        <span aria-hidden="true">!</span>
+        <span class="notification-dot" aria-hidden="true"></span>
+      </button>
+    </header>
+
+    <section class="page-content">
+      <router-outlet />
+    </section>
+  </main>
+</div>

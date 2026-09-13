@@ -1,0 +1,103 @@
+<section class="form-panel" aria-labelledby="asset-form-title">
+  <div class="form-heading">
+    <div>
+      <!--
+      <p class="section-kicker">{{ isEditing() ? 'Update register' : 'New register entry' }}</p>
+    -->
+      <h3 id="asset-form-title">{{ isEditing() ? 'แก้ไขครุภัณฑ์' : 'เพิ่มครุภัณฑ์ใหม่' }}</h3>
+    </div>
+    <button
+      class="close-button"
+      type="button"
+      aria-label="Close asset form"
+      (click)="cancelled.emit()"
+    >
+      ×
+    </button>
+  </div>
+
+  <form [formGroup]="assetForm" (ngSubmit)="submit()" novalidate>
+    <div class="form-row">
+      <label>
+        เลขครุภัณฑ์
+        <input formControlName="id" placeholder="" [readonly]="isEditing()" />
+      </label>
+
+      <label>
+        ป้ายครุภัณฑ์
+        <input formControlName="tag" placeholder="" />
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>
+        หมวดหมู่
+        <select formControlName="category">
+          <option value="" disabled>เลือกหมวดหมู่</option>
+          @for (category of categories | async; track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        สถานที่
+        <select formControlName="location">
+          <option value="" disabled>เลือกสถานที่</option>
+          @for (location of locations | async; track location.id) {
+            <option [value]="location.id">{{ location.name }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>
+        ตำแหน่งที่ติดตั้ง
+        <input formControlName="area" placeholder="ตัวอย่าง: ห้อง Services" />
+      </label>
+
+      <label>
+        ชั้น
+        <input formControlName="floor" placeholder="ตัวอย่าง: 1, 2, 3" />
+      </label>
+    </div>
+
+    <label>
+      เจ้าของ
+      <input formControlName="owner" placeholder="ตัวอย่าง: ทีมงานอาคาร" />
+    </label>
+
+    <div class="form-row">
+      <label>
+        สภาพครุภัณฑ์
+        <select formControlName="condition">
+          <option value="" disabled>เลือกสภาพครุภัณฑ์</option>
+          @for (condition of conditions | async; track condition.id) {
+            <option [value]="condition.id">{{ condition.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        การบำรุงรักษาครั้งถัดไป
+        <input
+          type="text"
+          formControlName="nextService"
+          placeholder="วว/ดด/ปปปป"
+          inputmode="numeric"
+          maxlength="10"
+          aria-describedby="next-service-format"
+        />
+        <small id="next-service-format">รูปแบบ: วว/ดด/ปปปป</small>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button class="cancel-button" type="button" (click)="cancelled.emit()">ยกเลิก</button>
+      <button class="save-button" type="submit">
+        {{ isEditing() ? 'บันทึกการแก้ไข' : 'เพิ่มครุภัณฑ์' }}
+      </button>
+    </div>
+  </form>
+</section>
