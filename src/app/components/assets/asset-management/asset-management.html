@@ -6,9 +6,11 @@
     aria-labelledby="asset-management-title"
     (click)="$event.stopPropagation()"
   >
+  <!--
     <h2 id="asset-management-title" class="sr-only">
       {{ asset() ? 'Edit asset' : 'Add asset' }}
     </h2>
+  -->
     <app-asset-form [asset]="asset()" (saved)="saved.emit($event)" (cancelled)="cancelled.emit()" />
     @if (error()) {
       <p class="form-error" role="alert">{{ error() }}</p>
