@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 type LoginForm = {
   email: FormControl<string>;
@@ -14,6 +15,7 @@ type LoginForm = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Login {
+  private readonly router = inject(Router);
   protected readonly isPasswordVisible = signal(false);
   protected readonly hasSubmitted = signal(false);
   protected readonly loginForm = new FormGroup<LoginForm>({
@@ -35,5 +37,7 @@ export class Login {
       this.loginForm.markAllAsTouched();
       return;
     }
+
+    void this.router.navigate(['/admin/work-orders']);
   }
 }
