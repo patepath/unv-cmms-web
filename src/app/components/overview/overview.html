@@ -5,11 +5,13 @@
       <strong>18</strong>
       <span class="metric-change positive">↓ 12% this week</span>
     </article>
+
     <article class="metric-card">
       <span class="metric-label">Asset availability</span>
       <strong>94.2%</strong>
       <span class="metric-change positive">↑ 2.4% this month</span>
     </article>
+
     <article class="metric-card">
       <span class="metric-label">Due this week</span>
       <strong>12</strong>
@@ -21,11 +23,12 @@
     <article class="chart-card work-order-chart">
       <div class="chart-heading">
         <div>
-          <p class="section-kicker">Work orders</p>
-          <h3>Status distribution</h3>
+          <p class="section-kicker">ใบสั่งงาน</p>
+          <h3>สถานะงาน</h3>
         </div>
-        <span class="chart-total">100 total</span>
+        <span class="chart-total">รวม 100</span>
       </div>
+
       <div class="donut-layout">
         <div
           class="donut-chart"
@@ -48,6 +51,7 @@
           </svg>
           <strong>58<small>%</small></strong>
         </div>
+
         <div class="legend">
           @for (slice of workOrderSlices; track slice.label) {
             <div class="legend-row">
@@ -63,11 +67,12 @@
     <article class="chart-card health-chart">
       <div class="chart-heading">
         <div>
-          <p class="section-kicker">Asset health</p>
-          <h3>Equipment condition</h3>
+          <p class="section-kicker">พัสดุ/อุปกรณ์</p>
+          <h3>สภาพพัสดุ/อุปกรณ์</h3>
         </div>
-        <span class="chart-total">204 assets</span>
+        <span class="chart-total">รวม 204</span>
       </div>
+
       <div class="health-bars">
         @for (metric of assetHealth; track metric.label) {
           <div class="health-row">
@@ -75,6 +80,7 @@
               <span>{{ metric.label }}</span
               ><strong>{{ metric.value }}%</strong>
             </div>
+
             <div class="bar-track">
               <span [style.width.%]="metric.value" [style.background-color]="metric.color"></span>
             </div>
@@ -92,6 +98,7 @@
         </div>
         <span class="trend-value">72 <small>planned</small></span>
       </div>
+
       <div
         class="line-chart"
         role="img"

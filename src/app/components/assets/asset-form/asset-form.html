@@ -1,9 +1,73 @@
+<div class="container-fluid overflow-auto">
+    <form [formGroup]="assetForm" (ngSubmit)="save()">
+        <div class="d-flex flex-column">
+            <div class="form-group mt-2" style="width: 10rem">
+                <label for="code">รหัสอุปกรณ์</label> 
+                <input type="text" class="form-control" id="code" formControlName="code" placeholder=""> 
+            </div>
+
+            <div class="form-group mt-2" style="width: 20rem;">
+                <label for="brandName">ประเภทอุปกรณ์</label>
+                <select class="form-select" id="category" formControlName="category_id">
+                    <option value="0" disabled>เลือกหมวดหมู่</option>
+                    <option value="1">หม้อแปลง</option>
+                    <option value="2">ตู้ไฟฟ้า</option>
+                    <option value="3">เครื่องกำเนิดไฟฟ้า</option>
+                    <option value="4">ปั้มเพิ่มแรงดัน</option>
+                    <option value="5">ปั้มดับเพลิง</option>
+                    <option value="6">ปั้มเติมอากาศ</option>
+                    <option value="7">ปั้มจุ่ม</option>
+                    <option value="8">กังหันตีน้ำ</option>
+                    <option value="9">สปริงเกอร์</option>
+                    <option value="10">สูบน้ำระบบเครื่องยนต์</option>
+                    <option value="11">สูบน้ำระบบไฟฟ้า</option>
+                    <option value="12">แจ้งเหตุเพลิงไหม้</option>
+                    <option value="13">ดับเพลิงชะลอน้ำ</option>
+                </select>
+            </div>
+
+            <div class="form-group mt-2" style="width: 20rem;">
+                <label for="building">อาคาร</label>
+                <select class="form-select" id="building" formControlName="building_id">
+                    <option value="0" disabled>เลือกอาคาร</option>
+                </select>
+            </div>
+
+            <div class="form-group mt-2">
+                <label for="location">สถานที่ติดตั้ง</label> 
+                <input type="text" class="form-control" id="location" formControlName="location" placeholder=""> 
+            </div>
+
+            <div class="form-group mt-2" style="width: 10rem;">
+                <label for="floor">ชั้น</label> 
+                <input type="text" class="form-control" id="floor" formControlName="floor" placeholder=""> 
+            </div>
+
+            <div class="form-group mt-2" style="width: 20rem;">
+                <label for="no">เลขที่พัสดุ</label> 
+                <input type="text" class="form-control" id="no" formControlName="no" placeholder=""> 
+            </div>
+
+            <div class="form-group mt-2" style="width: 20rem;">
+                <label for="brand">ยี่ห้อ</label>
+                <select class="form-select" id="brand" formControlName="brand_id">
+                    <option value="" disabled>เลือกยี่ห้อ</option>
+                </select>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">บันทึก</button>
+                <button type="button" class="btn btn-secondary ms-2" (click)="cancel()">ยกเลิก</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!--
 <section class="form-panel" aria-labelledby="asset-form-title">
   <div class="form-heading">
     <div>
-      <!--
       <p class="section-kicker">{{ isEditing() ? 'Update register' : 'New register entry' }}</p>
-    -->
       <h3 id="asset-form-title">{{ isEditing() ? 'แก้ไขครุภัณฑ์' : 'เพิ่มครุภัณฑ์ใหม่' }}</h3>
     </div>
     <button
@@ -101,3 +165,4 @@
     </div>
   </form>
 </section>
+    -->

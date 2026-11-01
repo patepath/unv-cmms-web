@@ -4,7 +4,7 @@ import { AssetForm } from '../asset-form/asset-form';
 
 @Component({
   selector: 'app-asset-management',
-  imports: [AssetForm],
+  imports: [],
   templateUrl: './asset-management.html',
   styleUrl: './asset-management.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

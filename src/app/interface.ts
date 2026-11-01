@@ -1,10 +1,17 @@
+export interface DataTable {
+  headerRow: string[];
+  footerRow: string[];
+  dataRows: string[][];
+}
+
 export type ServiceRecord = {
   date: string;
   task: string;
   technician: string;
 };
 
-export type AssetCondition = 'ใช้งานได้ปกติ' | 'ไม่ได้ใช้งาน' | 'ใช้งานได้แต่ต้องปรับปรุง' | 'ไม่สามารถใช้งานได้';
+export type AssetCondition =
+  'ใช้งานได้ปกติ' | 'ไม่ได้ใช้งาน' | 'ใช้งานได้แต่ต้องปรับปรุง' | 'ไม่สามารถใช้งานได้';
 
 export type Asset = {
   id: string;
@@ -30,10 +37,22 @@ export type Asset = {
 export type Category = {
   id: string;
   name: string;
+  group?: string;
 };
 
 export type Location = {
   id: string;
+  name: string;
+};
+
+export type Building = {
+  id: number;
+  code: string;
+  name: string;
+};
+
+export type Brand = {
+  id: number;
   name: string;
 };
 

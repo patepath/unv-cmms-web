@@ -1,0 +1,75 @@
+<div class="container-fluid overflow-auto">
+  <div class="d-flex flex-row">
+    <button class="add-button ms-1" type="button" [routerLink]="['/admin/category-form']">
+      <span aria-hidden="true">+</span> เพิ่มประเภทอุปกรณ์    
+    </button>
+  </div>
+
+  <div class="table-responsive mt-3">
+    <table id="setting-category-table" class="table table-bordered mb-3">
+        <caption></caption>
+
+        <thead>
+            <tr>
+                @for (header of dataTable.headerRow; track $index) {
+                    <th>{{ header }}</th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            @for (row of dataTable.dataRows; track $index) {
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    @for (cell of row; track $index) {
+                        <td>{{ cell }}</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!--
+<section class="category-page">
+  <div class="page-heading">
+    <div>
+      <p class="page-kicker">ข้อมูลพื้นฐาน</p>
+      <h2>ประเภทอุปกรณ์</h2>
+      <p>รายการประเภทอุปกรณ์ที่ใช้จัดหมวดหมู่ครุภัณฑ์</p>
+    </div>
+    <span class="category-count">ทั้งหมด {{ categories().length }} ประเภท</span>
+  </div>
+
+  <section class="category-list" aria-label="รายการประเภทอุปกรณ์">
+    @if (isLoading()) {
+      <p class="status-message" role="status">กำลังโหลดข้อมูลประเภทอุปกรณ์...</p>
+    } @else if (errorMessage()) {
+      <p class="status-message error-message" role="alert">{{ errorMessage() }}</p>
+    } @else if (categories().length === 0) {
+      <p class="status-message">ยังไม่มีข้อมูลประเภทอุปกรณ์</p>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">ลำดับ</th>
+              <th scope="col">ชื่อประเภท</th>
+              <th scope="col">กลุ่ม</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (category of categories(); track category.id; let index = $index) {
+              <tr>
+                <td>{{ index + 1 }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.group || '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>
+-->

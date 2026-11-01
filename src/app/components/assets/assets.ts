@@ -1,134 +1,75 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Asset, AssetDraft } from '../../interface';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { Asset, AssetDraft, DataTable } from '../../interface';
 import { AssetService } from '../../services/asset.service';
 import { AssetDetail } from './asset-detail/asset-detail';
 import { AssetManagement } from './asset-management/asset-management';
 
+declare let $:any;
+
 @Component({
   selector: 'app-assets',
-  imports: [AssetDetail, AssetManagement],
+  imports: [RouterLink],
   templateUrl: './assets.html',
   styleUrl: './assets.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Assets {
-  private readonly assetService = inject(AssetService);
-  protected readonly searchTerm = signal('');
-  protected readonly selectedLocation = signal('All locations');
-  protected readonly selectedAsset = signal<Asset | null>(null);
-  protected readonly currentPage = signal(1);
-  protected readonly pageSize = 6;
-  protected readonly editingAsset = signal<Asset | null>(null);
-  protected readonly isFormOpen = signal(false);
-  protected readonly formError = signal('');
-  protected readonly locations = ['All locations', 'Building A', 'Workshop', 'Warehouse'];
-  protected readonly assets = this.assetService.assets;
+export class Assets implements OnInit, AfterViewInit {
+	public dataTable!: DataTable;
+	public data!: string[][];
 
-  protected readonly filteredAssets = computed(() => {
-    const searchTerm = this.searchTerm().trim().toLowerCase();
-    const location = this.selectedLocation();
-    return this.assets().filter((asset) => {
-      const matchesSearch =
-        !searchTerm ||
-        `${asset.tag} ${asset.id} ${asset.category} ${asset.owner}`
-          .toLowerCase()
-          .includes(searchTerm);
-      const matchesLocation = location === 'All locations' || asset.location.name === location;
+	constructor() {
+		this.dataTable = {
+			headerRow: ['Equipment ID', 'Building No.', 'Building Name', 'Location', 'Floor', 'Asset No.', 'Asset Tag', 'Brand' ],
+			footerRow: ['Equipment ID', 'Building No.', 'Building Name', 'Location', 'Floor', 'Asset No.', 'Asset Tag', 'Brand' ],
+			dataRows: [],
+		};
 
-      return matchesSearch && matchesLocation;
-    });
-  });
+		this.data = [];
+	}
 
-  protected readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredAssets().length / this.pageSize)),
-  );
+	public ngOnInit(): void {
+		// Initialization logic here
+	}
 
-  protected readonly pageNumbers = computed(() =>
-    Array.from({ length: this.totalPages() }, (_, index) => index + 1),
-  );
+	public ngAfterViewInit(): void {
+		this.initTable();
+	}
 
-  protected readonly pagedAssets = computed(() => {
-    const startIndex = (this.currentPage() - 1) * this.pageSize;
-    return this.filteredAssets().slice(startIndex, startIndex + this.pageSize);
-  });
+ 	initTable() {
+		let self = this;
 
-  constructor() {
-    this.assetService.retrieveAssets().subscribe({
-      error: (error: unknown) => console.error('Unable to retrieve assets.', error),
-    });
-  }
+		let table = $('#setting-user-table').DataTable({
+			dom: 'Bfrtip',
+			buttons: ['copy', 'csv', 'excel', 'print'],
+			columnDefs: [
+				{ target: [0], width: '18em', className: 'dt-left' },
+				{ target: [2, 3 ], width: '18em', className: 'dt-center' },
+			],
+			responsive: true,
+			language: {
+				search: "_INPUT_",
+				searchPlaceholder: "Search records",
+			},
+			ordering: false,
+			paging: true,
+			pageLength: 15,
+			pagingType: "full_numbers",
+		});
 
-  protected updateSearch(event: Event): void {
-    this.searchTerm.set((event.target as HTMLInputElement).value);
-    this.currentPage.set(1);
-  }
+		table.on('mouseover', 'tr', function(this: any) {
+			$(this).css('cursor', 'pointer');
+			$(this).css('font-weight', 'bold');
+		});
 
-  protected selectLocation(location: string): void {
-    this.selectedLocation.set(location);
-    this.currentPage.set(1);
-  }
+		table.on('mouseout', 'tr', function(this: any) {
+			$(this).css('font-weight', 'normal');
+		});
 
-  protected goToPage(page: number): void {
-    this.currentPage.set(Math.min(Math.max(page, 1), this.totalPages()));
-  }
+		table.on('click', 'td', function(this: any) {
+			//self.edit(table.row(this).index());
+		});
 
-  protected previousPage(): void {
-    this.goToPage(this.currentPage() - 1);
-  }
-
-  protected nextPage(): void {
-    this.goToPage(this.currentPage() + 1);
-  }
-
-  protected selectAsset(asset: Asset): void {
-    this.selectedAsset.set(asset);
-  }
-
-  protected openCreateForm(): void {
-    this.formError.set('');
-    this.editingAsset.set(null);
-    this.isFormOpen.set(true);
-  }
-
-  protected openEditForm(asset: Asset): void {
-    this.formError.set('');
-    this.editingAsset.set(asset);
-    this.isFormOpen.set(true);
-  }
-
-  protected closeForm(): void {
-    this.formError.set('');
-    this.isFormOpen.set(false);
-    this.editingAsset.set(null);
-  }
-
-  protected saveAsset(draft: AssetDraft): void {
-    const editingAsset = this.editingAsset();
-    const duplicate = this.assets().some(
-      (asset) => asset.id === draft.id && asset.id !== editingAsset?.id,
-    );
-
-    if (duplicate) {
-      this.formError.set(`Asset ID ${draft.id} is already registered.`);
-
-      return;
-    }
-
-    const savedAsset = editingAsset
-      ? this.assetService.update(editingAsset.id, draft)
-      : this.assetService.create(draft);
-    if (savedAsset) {
-      this.selectedAsset.set(savedAsset);
-      this.closeForm();
-    }
-  }
-
-  protected deleteAsset(asset: Asset): void {
-    if (!window.confirm(`Delete ${asset.tag} (${asset.id})?`)) {
-      return;
-    }
-
-    this.assetService.delete(asset.id);
-    this.selectedAsset.set(null);
-  }
+		//self.search();
+	} 
 }

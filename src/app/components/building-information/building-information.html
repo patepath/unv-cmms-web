@@ -1,0 +1,73 @@
+<div class="container-fluid overflow-auto">
+  <div class="d-flex flex-row">
+    <button class="add-button ms-1" type="button" [routerLink]="['/admin/building-form']">
+      <span aria-hidden="true">+</span> เพิ่มอาคาร    
+    </button>
+  </div>
+
+  <div class="table-responsive mt-3">
+      <table id="setting-building-table" class="table table-bordered mb-3">
+          <caption></caption>
+
+          <thead>
+              <tr>
+                  @for (header of dataTable.headerRow; track $index) {
+                      <th>{{ header }}</th>
+                  }
+              </tr>
+          </thead>
+
+          <tbody>
+              @for (row of dataTable.dataRows; track $index) {
+                  <tr>
+                      <td>{{ $index + 1 }}</td>
+                      @for (cell of row; track $index) {
+                          <td>{{ cell }}</td>
+                      }
+                  </tr>
+              }
+          </tbody>
+      </table>
+  </div>
+  <!--
+  <div class="page-heading">
+    <div>
+      <p class="page-kicker">สถานที่</p>
+      <h2>ข้อมูลอาคาร</h2>
+      <p>รายการอาคารในระบบบริหารงานซ่อมบำรุง</p>
+    </div>
+    <span class="building-count">ทั้งหมด {{ buildings().length }} อาคาร</span>
+  </div>
+
+  <section class="building-list" aria-label="รายการอาคาร">
+    @if (isLoading()) {
+      <p class="status-message" role="status">กำลังโหลดข้อมูลอาคาร...</p>
+    } @else if (errorMessage()) {
+      <p class="status-message error-message" role="alert">{{ errorMessage() }}</p>
+    } @else if (buildings().length === 0) {
+      <p class="status-message">ยังไม่มีข้อมูลอาคาร</p>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">รหัสอาคาร</th>
+              <th scope="col">ชื่ออาคาร</th>
+              <th scope="col">วันที่เพิ่มข้อมูล</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (building of buildings(); track building.id) {
+              <tr>
+                <td>{{ building.code || '-' }}</td>
+                <td>{{ building.name }}</td>
+                <td>{{ building.created_at || '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+  -->
+</div>

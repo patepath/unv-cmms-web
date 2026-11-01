@@ -3,7 +3,16 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 type MenuItem = {
   label: string;
-  icon: 'overview' | 'work-orders' | 'assets' | 'maintenance' | 'operative-maintenance' | 'reports';
+  icon:
+    | 'overview'
+    | 'work-orders'
+    | 'assets'
+    | 'building'
+    | 'brand'
+    | 'category'
+    | 'maintenance'
+    | 'operative-maintenance'
+    | 'reports';
   path: string;
 };
 
@@ -20,10 +29,13 @@ export class DefaultLayout {
   protected readonly menuItems: MenuItem[] = [
     { label: 'ภาพรวม', icon: 'overview', path: 'overview' },
     { label: 'ใบสั่งงาน', icon: 'work-orders', path: 'work-orders' },
-    { label: 'ครุภัณฑ์', icon: 'assets', path: 'assets' },
-    { label: 'การบำรุงรักษาเชิงป้องกัน (PM)', icon: 'maintenance', path: 'preventive-maintenance', },
-    { label: 'การบำรุงรักษาเชิงปฏิบัติ (OM)', icon: 'operative-maintenance', path: 'operative-maintenance', },
+    { label: 'การบำรุงรักษาเชิงป้องกัน (PM)', icon: 'maintenance', path: 'preventive-maintenance' },
+    { label: 'การบำรุงรักษาเชิงปฏิบัติ (OM)', icon: 'operative-maintenance', path: 'operative-maintenance' },
     { label: 'รายงาน', icon: 'reports', path: 'reports' },
+    { label: 'รายการครุภัณฑ์', icon: 'assets', path: 'assets-list' },
+    { label: 'รายการอาคาร', icon: 'building', path: 'building-list' },
+    { label: 'รายการยี่ห้อ', icon: 'brand', path: 'brand-list' },
+//    { label: 'รายการประเภทอุปกรณ์', icon: 'category', path: 'category-list' },
   ];
 
   protected toggleSidebar(): void {

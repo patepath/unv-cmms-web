@@ -1,0 +1,73 @@
+<div class="container-fluid overflow-auto">
+  <div class="d-flex flex-row">
+    <button class="add-button ms-1" type="button" [routerLink]="['/admin/brand-form']">
+      <span aria-hidden="true">+</span> เพิ่มยี่ห้อ    
+    </button>
+  </div>
+
+  <div class="table-responsive mt-3">
+    <table id="setting-brand-table" class="table table-bordered mb-3">
+        <caption></caption>
+
+        <thead>
+            <tr>
+                @for (header of dataTable.headerRow; track $index) {
+                    <th>{{ header }}</th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            @for (row of dataTable.dataRows; track $index) {
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    @for (cell of row; track $index) {
+                        <td>{{ cell }}</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!--
+<section class="brand-page">
+  <div class="page-heading">
+    <div>
+      <p class="page-kicker">ข้อมูลพื้นฐาน</p>
+      <h2>ข้อมูลยี่ห้อ</h2>
+      <p>รายการยี่ห้อที่ใช้กับครุภัณฑ์ในระบบ</p>
+    </div>
+    <span class="brand-count">ทั้งหมด {{ brands().length }} ยี่ห้อ</span>
+  </div>
+
+  <section class="brand-list" aria-label="รายการยี่ห้อ">
+    @if (isLoading()) {
+      <p class="status-message" role="status">กำลังโหลดข้อมูลยี่ห้อ...</p>
+    } @else if (errorMessage()) {
+      <p class="status-message error-message" role="alert">{{ errorMessage() }}</p>
+    } @else if (brands().length === 0) {
+      <p class="status-message">ยังไม่มีข้อมูลยี่ห้อ</p>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">ลำดับ</th>
+              <th scope="col">ชื่อยี่ห้อ</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (brand of brands(); track brand.id; let index = $index) {
+              <tr>
+                <td>{{ index + 1 }}</td>
+                <td>{{ brand.name }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>
+-->

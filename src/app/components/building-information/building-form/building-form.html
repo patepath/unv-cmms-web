@@ -1,0 +1,20 @@
+<div class="container-fluid overflow-auto">
+    <form [formGroup]="buildingForm" (ngSubmit)="save()">
+        <div class="d-flex flex-column">
+            <div class="form-group" style="width: 10rem">
+                <label for="buildingCode">รหัสอาคาร</label>
+                <input type="text" class="form-control" id="code" formControlName="code" placeholder="กรอกรหัสอาคาร">
+            </div>
+
+            <div class="form-group mt-2" style="width: 40rem">
+                <label for="buildingName">ชื่ออาคาร</label>
+                <input type="text" class="form-control" id="name" formControlName="name" placeholder="กรอกชื่ออาคาร">
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">บันทึก</button>
+                <button type="button" class="btn btn-secondary ms-2" (click)="cancel()">ยกเลิก</button>
+            </div>
+        </div>
+    </form>
+</div>

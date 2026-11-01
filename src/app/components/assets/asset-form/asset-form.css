@@ -58,34 +58,6 @@ form {
   align-items: start;
 }
 
-label {
-  display: grid;
-  flex: 1;
-  gap: 7px;
-  color: #4e5c56;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-input,
-select {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 40px;
-  border: 1px solid #dfe7e1;
-  border-radius: 6px;
-  padding: 0 10px;
-  color: #17231f;
-  background: #fff;
-  font: inherit;
-  font-size: 12px;
-}
-
-input:focus,
-select:focus {
-  border-color: #fa4616;
-  outline: 3px solid rgb(250 70 22 / 18%);
-}
 
 input[readonly] {
   color: #73817b;

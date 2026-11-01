@@ -1,4 +1,55 @@
-<div class="assets-page">
+<div class="container-fluid overflow-auto">
+  <div class="d-flex flex-row">
+    <div class="form-group">
+      <select class="form-select">
+        <option>หม้อแปลง</option>
+        <option>ตู้ไฟฟ้า</option>
+        <option>เครื่องกำเนิดไฟฟ้า</option>
+        <option>ปั้มเพิ่มแรงดัน</option>
+        <option>ปั้มดับเพลิง</option>
+        <option>ปั้มเติมอากาศ</option>
+        <option>ปั้มจุ่ม</option>
+        <option>กังหันตีน้ำ</option>
+        <option>สปริงเกอร์</option>
+        <option>สูบน้ำระบบเครื่องยนต์</option>
+        <option>สูบน้ำระบบไฟฟ้า</option>
+        <option>แจ้งเหตุเพลิงไหม้</option>
+        <option>ดับเพลิงชะลอน้ำ</option>
+      </select>
+    </div>
+
+    <button class="add-button ms-1" type="button" [routerLink]="['/admin/asset-form']">
+      <span aria-hidden="true">+</span> เพิ่มครุภัณฑ์
+    </button>
+  </div>
+
+  <div class="table-responsive mt-3">
+      <table id="setting-user-table" class="table table-bordered mb-3">
+          <caption></caption>
+
+          <thead>
+              <tr>
+                  @for (header of dataTable.headerRow; track $index) {
+                      <th>{{ header }}</th>
+                  }
+              </tr>
+          </thead>
+
+          <tbody>
+              @for (row of dataTable.dataRows; track $index) {
+                  <tr>
+                      <td>{{ $index + 1 }}</td>
+                      @for (cell of row; track $index) {
+                          <td>{{ cell }}</td>
+                      }
+                  </tr>
+              }
+          </tbody>
+      </table>
+  </div>
+</div>
+
+  <!--
   <section class="page-intro">
     <div></div>
 
@@ -50,7 +101,9 @@
       (cancelled)="closeForm()"
     />
   }
+  -->
 
+  <!--
   <section class="asset-layout">
     <div class="asset-list" aria-label="Equipment list">
       <div class="list-heading">
@@ -60,7 +113,6 @@
 
         <span class="asset-count">แสดง {{ filteredAssets().length }} รายการ</span>
       </div>
-
       <div class="asset-cards">
         @for (asset of filteredAssets(); track asset.id) {
           <button
@@ -74,14 +126,13 @@
               asset.category.name === 'HVAC' ? '◌' : '▦'
             }}</span>
             <span class="asset-card-copy">
-              <!--
               <span class="asset-card-topline">
                 <strong>{{ asset.name }}</strong>
                 <span class="condition" [class]="asset.condition.toLowerCase().replace(' ', '-')">{{
                   asset.condition
                 }}</span>
               </span>
-              -->
+            
               <span class="asset-id">{{ asset.id }} · {{ asset.category }}</span>
               <span class="asset-location">{{ asset.location }} · Owned by {{ asset.owner }}</span>
             </span>
@@ -138,4 +189,4 @@
       </aside>
     }
   </section>
-</div>
+  -->
