@@ -1,3 +1,3 @@
 export const environment = {
-    apiUrl: 'http://localhost:3000/api/v1'
+    apiUrl: 'https://www.kmutt-cmms.com/api/v1'
 };

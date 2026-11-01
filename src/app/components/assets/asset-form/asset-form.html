@@ -9,27 +9,28 @@
             <div class="form-group mt-2" style="width: 20rem;">
                 <label for="brandName">ประเภทอุปกรณ์</label>
                 <select class="form-select" id="category" formControlName="category_id">
-                    <option value="0" disabled>เลือกหมวดหมู่</option>
-                    <option value="1">หม้อแปลง</option>
-                    <option value="2">ตู้ไฟฟ้า</option>
-                    <option value="3">เครื่องกำเนิดไฟฟ้า</option>
-                    <option value="4">ปั้มเพิ่มแรงดัน</option>
-                    <option value="5">ปั้มดับเพลิง</option>
-                    <option value="6">ปั้มเติมอากาศ</option>
-                    <option value="7">ปั้มจุ่ม</option>
-                    <option value="8">กังหันตีน้ำ</option>
-                    <option value="9">สปริงเกอร์</option>
-                    <option value="10">สูบน้ำระบบเครื่องยนต์</option>
-                    <option value="11">สูบน้ำระบบไฟฟ้า</option>
-                    <option value="12">แจ้งเหตุเพลิงไหม้</option>
-                    <option value="13">ดับเพลิงชะลอน้ำ</option>
+                    <option [ngValue]="0" disabled>เลือกหมวดหมู่</option>
+                    <option [ngValue]="1">หม้อแปลง</option>
+                    <option [ngValue]="2">ตู้ไฟฟ้า</option>
+                    <option [ngValue]="3">เครื่องกำเนิดไฟฟ้า</option>
+                    <option [ngValue]="4">ปั้มส่งน้ำ</option>
+                    <option [ngValue]="5">ปั้มเพิ่มแรงดัน</option>
+                    <option [ngValue]="6">ปั้มดับเพลิง</option>
+                    <option [ngValue]="7">ปั้มเติมอากาศ</option>
+                    <option [ngValue]="8">ปั้มจุ่ม</option>
+                    <option [ngValue]="9">กังหันตีน้ำ</option>
+                    <option [ngValue]="10">สปริงเกอร์</option>
+                    <option [ngValue]="11">สูบน้ำระบบเครื่องยนต์</option>
+                    <option [ngValue]="12">สูบน้ำระบบไฟฟ้า</option>
+                    <option [ngValue]="13">แจ้งเหตุเพลิงไหม้</option>
+                    <option [ngValue]="14">ดับเพลิงชะลอน้ำ</option>
                 </select>
             </div>
 
             <div class="form-group mt-2" style="width: 20rem;">
                 <label for="building">อาคาร</label>
                 <select class="form-select" id="building" formControlName="building_id">
-                    <option value="0" disabled>เลือกอาคาร</option>
+                    <option [ngValue]="0" disabled>เลือกอาคาร</option>
                 </select>
             </div>
 
@@ -51,9 +52,393 @@
             <div class="form-group mt-2" style="width: 20rem;">
                 <label for="brand">ยี่ห้อ</label>
                 <select class="form-select" id="brand" formControlName="brand_id">
-                    <option value="" disabled>เลือกยี่ห้อ</option>
+                    <option [ngValue]="0" disabled>เลือกยี่ห้อ</option>
                 </select>
             </div>
+
+            <p></p>
+
+            @if(assetForm.get('category_id')?.value === 1) {
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="tr_type">ประเภทหม้อแปลง</label>
+                  <select class="form-select" id="tr_type" formControlName="tr_type">
+                      <option [ngValue]="0" disabled>เลือกประเภทหม้อแปลง</option>
+                      <option [ngValue]="1">Dry Type</option>
+                      <option [ngValue]="2">Oil Type</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="rate_capacity">กำลังไฟฟ้า (kVA)</label> 
+                  <input type="text" class="form-control" id="rate_capacity" formControlName="rate_capacity" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="protection_equipment">ประเภทอุปกรณ์ป้องกัน</label>
+                  <select class="form-select" id="protection_equipment" formControlName="protection_equipment">
+                      <option [ngValue]="0" disabled>เลือกอุปกรณ์ป้องกัน</option>
+                      <option [ngValue]="1">Drop Out Fuse</option>
+                      <option [ngValue]="2">RMU</option>
+                  </select>
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 2) {
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="main_type">ประเภทตู้เมน</label>
+                  <select class="form-select" id="main_type" formControlName="main_type">
+                      <option [ngValue]="0">-</option>
+                      <option [ngValue]="1">ACB</option>
+                      <option [ngValue]="2">MCB</option>
+                      <option [ngValue]="3">MCCB</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="rate_current">กระแสไฟฟ้า (AMP)</label> 
+                  <input type="text" class="form-control" id="rate_current" formControlName="rate_current" placeholder=""> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 3) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="engine_model">รุ่นเครื่องยนต์</label> 
+                  <input type="text" class="form-control" id="engine_model" formControlName="engine_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="engine_power_hp">กำลังเครื่องยนต์ (HP)</label> 
+                  <input type="text" class="form-control" id="engine_power_hp" formControlName="engine_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="engine_power_kw">กำลังเครื่องยนต์ (KW)</label> 
+                  <input type="text" class="form-control" id="engine_power_kw" formControlName="engine_power_kw" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="alternative_brand">ยี่ห้อทางเลือก</label>
+                  <select class="form-select" id="alternative_brand" formControlName="alternative_brand">
+                      <option [ngValue]="0" disabled>เลือกยี่ห้อทางเลือก</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="alternative_model">รุ่นเครื่องยนต์ทางเลือก</label> 
+                  <input type="text" class="form-control" id="alternative_model" formControlName="alternative_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="base_rating_kva">กำลังไฟฟ้าพิกัด (kVA)</label> 
+                  <input type="text" class="form-control" id="base_rating_kva" formControlName="base_rating_kva" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="base_rating_kw">กำลังไฟฟ้าพิกัด (KW)</label> 
+                  <input type="text" class="form-control" id="base_rating_kw" formControlName="base_rating_kw" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="fuel_tank_capacity">ความจุถังน้ำมัน (ลิตร)</label> 
+                  <input type="text" class="form-control" id="fuel_tank_capacity" formControlName="fuel_tank_capacity" placeholder=""> 
+              </div> 
+            }
+
+            @if(assetForm.get('category_id')?.value === 4) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_model">รุ่นเครื่องยนต์</label> 
+                  <input type="text" class="form-control" id="motor_model" formControlName="motor_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_power_hp">กำลังเครื่องยนต์ (HP)</label> 
+                  <input type="text" class="form-control" id="motor_power_hp" formControlName="motor_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="pump_brand">ยี่ห้อปั้ม</label>
+                  <select class="form-select" id="pump_brand" formControlName="pump_brand">
+                      <option [ngValue]="0" disabled>เลือกยี่ห้อปั้ม</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="pump_model">รุ่นปั้ม</label> 
+                  <input type="text" class="form-control" id="pump_model" formControlName="pump_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate_min">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate_min" formControlName="flow_rate_min" placeholder="เริ่มต้น"> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate_max">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate_max" formControlName="flow_rate_max" placeholder="สูงสุด"> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 5) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_model">รุ่นเครื่องยนต์</label> 
+                  <input type="text" class="form-control" id="motor_model" formControlName="motor_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_power_hp">กำลังเครื่องยนต์ (HP)</label> 
+                  <input type="text" class="form-control" id="motor_power_hp" formControlName="motor_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="pump_brand">ยี่ห้อปั้ม</label>
+                  <select class="form-select" id="pump_brand" formControlName="pump_brand">
+                      <option [ngValue]="0" disabled>เลือกยี่ห้อปั้ม</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="pump_model">รุ่นปั้ม</label> 
+                  <input type="text" class="form-control" id="pump_model" formControlName="pump_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate_min">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate_min" formControlName="flow_rate_min" placeholder="เริ่มต้น"> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate_max">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate_max" formControlName="flow_rate_max" placeholder="สูงสุด"> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="pressure_tank_capacity">ความจุถังแรงดัน (ลิตร)</label> 
+                  <input type="text" class="form-control" id="pressure_tank_capacity" formControlName="pressure_tank_capacity" placeholder="ความจุถังแรงดัน"> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 6) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="diesel_engine_model">รุ่นเครื่องยนต์ดีเซล</label> 
+                  <input type="text" class="form-control" id="diesel_engine_model" formControlName="diesel_engine_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="diesel_engine_power_hp">กำลังเครื่องยนต์ (HP)</label> 
+                  <input type="text" class="form-control" id="diesel_engine_power_hp" formControlName="diesel_engine_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="fire_pump_brand">ยี่ห้อปั้มดับเพลิง</label>
+                  <select class="form-select" id="fire_pump_brand" formControlName="fire_pump_brand">
+                      <option [ngValue]="0" disabled>เลือกยี่ห้อปั้มดับเพลิง</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="fire_pump_model">รุ่นปั้มดับเพลิง</label> 
+                  <input type="text" class="form-control" id="fire_pump_model" formControlName="fire_pump_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="fire_pump_flow_rate">อัตราการไหล (m3/hr)</label> 
+                  <input type="text" class="form-control" id="fire_pump_flow_rate" formControlName="fire_pump_flow_rate" placeholder=""> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 7) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_model">รุ่นมอเตอร์</label> 
+                  <input type="text" class="form-control" id="motor_model" formControlName="motor_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_power_hp">กำลังมอเตอร์ (HP)</label> 
+                  <input type="text" class="form-control" id="motor_power_hp" formControlName="motor_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="blower_brand">ยี่ห้อปั้มเติมอากาศ</label>
+                  <select class="form-select" id="blower_brand" formControlName="blower_brand">
+                      <option [ngValue]="0" disabled>เลือกยี่ห้อปั้มเติมอากาศ</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="blower_model">รุ่นปั้มเติมอากาศ</label> 
+                  <input type="text" class="form-control" id="blower_model" formControlName="blower_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="blower_airflow_capacity">ความจุอากาศ</label> 
+                  <input type="text" class="form-control" id="blower_airflow_capacity" formControlName="blower_airflow_capacity" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="blower_airflow_capacity_unit">หน่วยความจุอากาศ</label> 
+                  <select class="form-select" id="blower_airflow_capacity_unit" formControlName="blower_airflow_capacity_unit">
+                      <option value="" disabled>เลือกหน่วย</option>
+                      <option value="m3/hr">m3/hr</option>
+                      <option value="l/m">l/m</option>
+                  </select>
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 8) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_model">รุ่นมอเตอร์</label> 
+                  <input type="text" class="form-control" id="motor_model" formControlName="motor_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_power_hp">กำลังมอเตอร์ (HP)</label> 
+                  <input type="text" class="form-control" id="motor_power_hp" formControlName="motor_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate" formControlName="flow_rate" placeholder=""> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 9) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_model">รุ่นมอเตอร์</label> 
+                  <input type="text" class="form-control" id="motor_model" formControlName="motor_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_power_hp">กำลังมอเตอร์ (HP)</label> 
+                  <input type="text" class="form-control" id="motor_power_hp" formControlName="motor_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate" formControlName="flow_rate" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="rpm">รอบต่อนาที (RPM)</label> 
+                  <input type="text" class="form-control" id="rpm" formControlName="rpm" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="voltage">แรงดันไฟฟ้า (V)</label> 
+                  <input type="text" class="form-control" id="voltage" formControlName="voltage" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="phase">เฟส</label> 
+                  <input type="text" class="form-control" id="phase" formControlName="phase" placeholder=""> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 10) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_model">รุ่นมอเตอร์</label> 
+                  <input type="text" class="form-control" id="motor_model" formControlName="motor_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_power_hp">กำลังมอเตอร์ (HP)</label> 
+                  <input type="text" class="form-control" id="motor_power_hp" formControlName="motor_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="pump_brand">ยี่ห้อปั้ม</label>
+                  <select class="form-select" id="pump_brand" formControlName="pump_brand">
+                      <option [ngValue]="0" disabled>เลือกยี่ห้อปั้ม</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="pump_model">รุ่นปั้ม</label> 
+                  <input type="text" class="form-control" id="pump_model" formControlName="pump_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate_min">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate_min" formControlName="flow_rate_min" placeholder="เริ่มต้น"> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate_max">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate_max" formControlName="flow_rate_max" placeholder="สูงสุด"> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 11) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="diesel_engine_model">รุ่นเครื่องยนต์ดีเซล</label> 
+                  <input type="text" class="form-control" id="diesel_engine_model" formControlName="diesel_engine_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="diesel_engine_power_hp">กำลังเครื่องยนต์ (HP)</label> 
+                  <input type="text" class="form-control" id="diesel_engine_power_hp" formControlName="diesel_engine_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="water_pump_model">รุ่นเครื่องสูบน้ำ</label> 
+                  <input type="text" class="form-control" id="water_pump_model" formControlName="water_pump_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="battery">แบตเตอรี่</label> 
+                  <input type="text" class="form-control" id="battery" formControlName="battery" placeholder=""> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 12) {
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_model">รุ่นมอเตอร์</label> 
+                  <input type="text" class="form-control" id="motor_model" formControlName="motor_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="motor_power_hp">กำลังมอเตอร์ (HP)</label> 
+                  <input type="text" class="form-control" id="motor_power_hp" formControlName="motor_power_hp" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="water_pump_model">รุ่นเครื่องสูบน้ำ</label> 
+                  <input type="text" class="form-control" id="water_pump_model" formControlName="water_pump_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="flow_rate">อัตราการไหล (ลิตร/นาที)</label> 
+                  <input type="text" class="form-control" id="flow_rate" formControlName="flow_rate" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="rpm">รอบต่อนาที (RPM)</label> 
+                  <input type="text" class="form-control" id="rpm" formControlName="rpm" placeholder=""> 
+              </div>
+            }
+
+            @if(assetForm.get('category_id')?.value === 13 || assetForm.get('category_id')?.value === 14) {
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="fcp_model">รุ่น FCP</label>
+                  <input type="text" class="form-control" id="fcp_model" formControlName="fcp_model" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="cabinet_total">จำนวนตู้</label> 
+                  <input type="text" class="form-control" id="cabinet_total" formControlName="cabinet_total" placeholder=""> 
+              </div>
+
+              <div class="form-group mt-2" style="width: 10rem;">
+                  <label for="annuciator_brand">ยี่ห้อแอนนูซิเอเตอร์</label> 
+                  <select class="form-select" id="annuciator_brand" formControlName="annuciator_brand">
+                      <option value="0" disabled>เลือกยี่ห้อ</option>
+                  </select>
+              </div>
+
+              <div class="form-group mt-2" style="width: 20rem;">
+                  <label for="battery">แบตเตอรี่</label> 
+                  <input type="text" class="form-control" id="battery" formControlName="battery" placeholder=""> 
+              </div>
+            }
 
             <div class="form-group mt-4">
                 <button type="submit" class="btn btn-primary">บันทึก</button>
@@ -62,107 +447,3 @@
         </div>
     </form>
 </div>
-
-<!--
-<section class="form-panel" aria-labelledby="asset-form-title">
-  <div class="form-heading">
-    <div>
-      <p class="section-kicker">{{ isEditing() ? 'Update register' : 'New register entry' }}</p>
-      <h3 id="asset-form-title">{{ isEditing() ? 'แก้ไขครุภัณฑ์' : 'เพิ่มครุภัณฑ์ใหม่' }}</h3>
-    </div>
-    <button
-      class="close-button"
-      type="button"
-      aria-label="Close asset form"
-      (click)="cancelled.emit()"
-    >
-      ×
-    </button>
-  </div>
-
-  <form [formGroup]="assetForm" (ngSubmit)="submit()" novalidate>
-    <div class="form-row">
-      <label>
-        เลขครุภัณฑ์
-        <input formControlName="id" placeholder="" [readonly]="isEditing()" />
-      </label>
-
-      <label>
-        ป้ายครุภัณฑ์
-        <input formControlName="tag" placeholder="" />
-      </label>
-    </div>
-
-    <div class="form-row">
-      <label>
-        หมวดหมู่
-        <select formControlName="category">
-          <option value="" disabled>เลือกหมวดหมู่</option>
-          @for (category of categories | async; track category.id) {
-            <option [value]="category.id">{{ category.name }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        สถานที่
-        <select formControlName="location">
-          <option value="" disabled>เลือกสถานที่</option>
-          @for (location of locations | async; track location.id) {
-            <option [value]="location.id">{{ location.name }}</option>
-          }
-        </select>
-      </label>
-    </div>
-
-    <div class="form-row">
-      <label>
-        ตำแหน่งที่ติดตั้ง
-        <input formControlName="area" placeholder="ตัวอย่าง: ห้อง Services" />
-      </label>
-
-      <label>
-        ชั้น
-        <input formControlName="floor" placeholder="ตัวอย่าง: 1, 2, 3" />
-      </label>
-    </div>
-
-    <label>
-      เจ้าของ
-      <input formControlName="owner" placeholder="ตัวอย่าง: ทีมงานอาคาร" />
-    </label>
-
-    <div class="form-row">
-      <label>
-        สภาพครุภัณฑ์
-        <select formControlName="condition">
-          <option value="" disabled>เลือกสภาพครุภัณฑ์</option>
-          @for (condition of conditions | async; track condition.id) {
-            <option [value]="condition.id">{{ condition.name }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        การบำรุงรักษาครั้งถัดไป
-        <input
-          type="text"
-          formControlName="nextService"
-          placeholder="วว/ดด/ปปปป"
-          inputmode="numeric"
-          maxlength="10"
-          aria-describedby="next-service-format"
-        />
-        <small id="next-service-format">รูปแบบ: วว/ดด/ปปปป</small>
-      </label>
-    </div>
-
-    <div class="form-actions">
-      <button class="cancel-button" type="button" (click)="cancelled.emit()">ยกเลิก</button>
-      <button class="save-button" type="submit">
-        {{ isEditing() ? 'บันทึกการแก้ไข' : 'เพิ่มครุภัณฑ์' }}
-      </button>
-    </div>
-  </form>
-</section>
-    -->

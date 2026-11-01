@@ -1,15 +1,13 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { Asset, AssetDraft, DataTable } from '../../interface';
-import { AssetService } from '../../services/asset.service';
-import { AssetDetail } from './asset-detail/asset-detail';
-import { AssetManagement } from './asset-management/asset-management';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { DataTable } from '../../interface';
+import { ReactiveFormsModule } from '@angular/forms';
 
 declare let $:any;
 
 @Component({
   selector: 'app-assets',
-  imports: [RouterLink],
+  imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './assets.html',
   styleUrl: './assets.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

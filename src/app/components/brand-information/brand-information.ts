@@ -1,5 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { Brand, DataTable } from '../../interface';
+import { BrandService } from '../../services/brand.service';
 import { RouterLink } from '@angular/router';
 
 declare let $:any;
@@ -15,7 +16,7 @@ export class BrandInformation implements OnInit, AfterViewInit {
 	public dataTable!: DataTable;
 	public data!: string[][];
 
-	constructor() {
+	constructor(private brandService: BrandService) {
 		this.dataTable = {
 			headerRow: ['ชื่อยี่ห้อ'],
 			footerRow: ['ชื่อยี่ห้อ'],
@@ -26,6 +27,7 @@ export class BrandInformation implements OnInit, AfterViewInit {
 	}
 
 	ngOnInit(): void {
+		this.search();
 	}
 
 	ngAfterViewInit(): void {
@@ -65,4 +67,14 @@ export class BrandInformation implements OnInit, AfterViewInit {
 
 		//self.search();
 	} 
+
+	search() {
+		this.brandService.get().subscribe(rs => {
+			this.data = rs.map(b => [b.name]);
+
+			this.dataTable.dataRows = this.data;
+			// Refresh the table with new data
+			$('#setting-brand-table').DataTable().clear().rows.add(this.data).draw();
+		});
+	}
 }

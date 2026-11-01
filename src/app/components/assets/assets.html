@@ -2,19 +2,21 @@
   <div class="d-flex flex-row">
     <div class="form-group">
       <select class="form-select">
-        <option>หม้อแปลง</option>
-        <option>ตู้ไฟฟ้า</option>
-        <option>เครื่องกำเนิดไฟฟ้า</option>
-        <option>ปั้มเพิ่มแรงดัน</option>
-        <option>ปั้มดับเพลิง</option>
-        <option>ปั้มเติมอากาศ</option>
-        <option>ปั้มจุ่ม</option>
-        <option>กังหันตีน้ำ</option>
-        <option>สปริงเกอร์</option>
-        <option>สูบน้ำระบบเครื่องยนต์</option>
-        <option>สูบน้ำระบบไฟฟ้า</option>
-        <option>แจ้งเหตุเพลิงไหม้</option>
-        <option>ดับเพลิงชะลอน้ำ</option>
+          <option [ngValue]="0" disabled>เลือกหมวดหมู่</option>
+          <option [ngValue]="1">หม้อแปลง</option>
+          <option [ngValue]="2">ตู้ไฟฟ้า</option>
+          <option [ngValue]="3">เครื่องกำเนิดไฟฟ้า</option>
+          <option [ngValue]="4">ปั้มส่งน้ำ</option>
+          <option [ngValue]="5">ปั้มเพิ่มแรงดัน</option>
+          <option [ngValue]="6">ปั้มดับเพลิง</option>
+          <option [ngValue]="7">ปั้มเติมอากาศ</option>
+          <option [ngValue]="8">ปั้มจุ่ม</option>
+          <option [ngValue]="9">กังหันตีน้ำ</option>
+          <option [ngValue]="10">สปริงเกอร์</option>
+          <option [ngValue]="11">สูบน้ำระบบเครื่องยนต์</option>
+          <option [ngValue]="12">สูบน้ำระบบไฟฟ้า</option>
+          <option [ngValue]="13">แจ้งเหตุเพลิงไหม้</option>
+          <option [ngValue]="14">ดับเพลิงชะลอน้ำ</option>
       </select>
     </div>
 
