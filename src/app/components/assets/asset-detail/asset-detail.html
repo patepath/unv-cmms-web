@@ -18,9 +18,9 @@
     </button>
   </div>
 
-  <p class="section-kicker">{{ asset().id }}</p>
-  <h3 id="asset-detail-title">{{ asset().tag }}</h3>
-  <p class="detail-category">{{ asset().category }}</p>
+    <p class="section-kicker">Asset ID: {{ asset().id }}</p>
+    <h3 id="asset-detail-title">{{ asset().asset_tag }}</h3>
+  <p class="detail-category">{{ asset().category.name }}</p>
 
   <dl class="asset-facts">
     <div>
@@ -29,39 +29,20 @@
     </div>
 
     <div>
-      <dt>Owner</dt>
-      <dd>{{ asset().owner }}</dd>
+      <dt>Buildings</dt>
+      <dd>
+        @for (building of asset().buildings; track building.id; let last = $last) {
+          {{ building.name }}@if (!last) {, }
+        } @empty {
+          -
+        }
+      </dd>
     </div>
 
     <div>
-      <dt>Last service</dt>
-      <dd>{{ asset().last_service }}</dd>
-    </div>
-
-    <div>
-      <dt>Next service</dt>
-      <dd>{{ asset().next_service }}</dd>
+      <dt>Status</dt>
+      <dd>{{ asset().status }}</dd>
     </div>
 
   </dl>
-
-  <div class="history-heading">
-    <h4>Service history</h4>
-    <span>{{ asset().service_records.length }} records</span>
-  </div>
-
-  <div class="history-list">
-    @for (record of asset().service_records; track record.date + record.task) {
-      <div class="history-record">
-        <span class="history-dot" aria-hidden="true"></span>
-
-        <div>
-          <strong>{{ record.task }}</strong
-          ><small>{{ record.date }} · {{ record.technician }}</small>
-        </div>
-      </div>
-    } @empty {
-      <p class="empty-history">No service records yet.</p>
-    }
-  </div>
 </aside>

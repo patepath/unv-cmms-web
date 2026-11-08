@@ -32,7 +32,7 @@ export class DefaultLayout {
     { label: 'การบำรุงรักษาเชิงป้องกัน (PM)', icon: 'maintenance', path: 'preventive-maintenance' },
     { label: 'การบำรุงรักษาเชิงปฏิบัติ (OM)', icon: 'operative-maintenance', path: 'operative-maintenance' },
     { label: 'รายงาน', icon: 'reports', path: 'reports' },
-    { label: 'รายการครุภัณฑ์', icon: 'assets', path: 'assets-list' },
+    { label: 'รายการเครื่องจักร', icon: 'assets', path: 'assets-list' },
     { label: 'รายการอาคาร', icon: 'building', path: 'building-list' },
     { label: 'รายการยี่ห้อ', icon: 'brand', path: 'brand-list' },
 //    { label: 'รายการประเภทอุปกรณ์', icon: 'category', path: 'category-list' },

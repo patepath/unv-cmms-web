@@ -1,6 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormControl, FormGroup,  ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Asset, AssetDraft, Building } from '../../../interface';
+import { AssetService } from '../../../services/asset.service';
+import { BuildingService } from '../../../services/building.service';
 
 @Component({
   selector: 'app-asset-form',
@@ -9,13 +13,17 @@ import { Router } from '@angular/router';
   styleUrl: './asset-form.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AssetForm {
+export class AssetForm implements OnInit {
+  public buildings: Building[] = [];
+  public isSaving = false;
+  public errorMessage = '';
+  private assetId: number | null = null;
 
   public assetForm = new FormGroup({
     id: new FormControl(0),
     category_id: new FormControl(0),
     code: new FormControl(''),
-    building_id: new FormControl(0),
+    building_ids: new FormControl<number[]>([]),
     location: new FormControl(''),
     floor: new FormControl(''),
     no: new FormControl(''),
@@ -93,11 +101,81 @@ export class AssetForm {
     
   });
 
-  constructor(private router: Router) {
-    
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private assetService: AssetService,
+    private buildingService: BuildingService,
+  ) {
+  }
+
+  ngOnInit(): void {
+    this.buildingService.get().subscribe((buildings) => {
+      this.buildings = buildings;
+    });
+
+    this.route.queryParamMap.subscribe((params) => {
+      const id = Number(params.get('id'));
+      if (id > 0) {
+        this.assetId = id;
+        this.assetService.get(id).subscribe({
+          next: (asset) => this.populateForm(asset),
+          error: (error: HttpErrorResponse) => {
+            this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูล asset ได้';
+          },
+        });
+      }
+    });
   }
 
   public save(): void {
+    if (this.assetForm.invalid || this.isSaving) {
+      return;
+    }
+
+    this.isSaving = true;
+    this.errorMessage = '';
+    const value = this.assetForm.getRawValue();
+    const draft: AssetDraft = {
+      category_id: value.category_id || null,
+      location: value.location ?? '',
+      floor: value.floor ?? '',
+      asset_no: value.no ?? '',
+      asset_tag: value.tag ?? '',
+      building_ids: value.building_ids ?? [],
+      brand_id: value.brand_id || null,
+      model: value.engine_model ?? '',
+      unit_number: String(value.unit_number ?? ''),
+      status: 'ACTIVE',
+    };
+
+    const request = this.assetId === null
+      ? this.assetService.create(draft)
+      : this.assetService.update(this.assetId, draft);
+
+    request.subscribe({
+      next: () => this.router.navigate(['/admin/assets-list']),
+      error: (error: HttpErrorResponse) => {
+        this.isSaving = false;
+        this.errorMessage = error.error?.error ?? 'ไม่สามารถบันทึกข้อมูล asset ได้';
+      },
+    });
+  }
+
+  private populateForm(asset: Asset): void {
+    this.assetForm.patchValue({
+      id: asset.id,
+      category_id: asset.category_id ?? 0,
+      code: asset.asset_no,
+      building_ids: asset.buildings.map((building) => building.id),
+      location: asset.location,
+      floor: asset.floor,
+      no: asset.asset_no,
+      tag: asset.asset_tag,
+      brand_id: asset.brand_id ?? 0,
+      engine_model: asset.model,
+      unit_number: Number(asset.unit_number) || 0,
+    });
   }
 
   public cancel(): void {
