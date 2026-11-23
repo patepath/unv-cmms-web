@@ -7,7 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Asset, DataTable } from '../../interface';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AssetService } from '../../services/asset.service';
@@ -35,6 +35,7 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private assetService: AssetService,
     private router: Router,
+    private route: ActivatedRoute,
     private changeDetector: ChangeDetectorRef,
   ) {
     this.dataTable = {
@@ -65,6 +66,9 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public ngOnInit(): void {
+    const selectedCategoryId = Number(this.route.snapshot.queryParamMap.get('selectedCategoryId'));
+    this.selectedCategoryId =
+      Number.isInteger(selectedCategoryId) && selectedCategoryId > 0 ? selectedCategoryId : 0;
     this.loadAssets();
   }
 
@@ -130,7 +134,10 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
       const asset = this.displayedAssets[rowIndex];
       if (asset) {
         this.router.navigate(['/admin/asset-form'], {
-          queryParams: { id: asset.id },
+          queryParams: {
+            id: asset.id,
+            selectedCategoryId: this.selectedCategoryId || null,
+          },
         });
       }
     });
@@ -145,6 +152,11 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
     const categoryId = Number((event.target as HTMLSelectElement).value);
     this.selectedCategoryId = Number.isNaN(categoryId) ? 0 : categoryId;
     this.errorMessage = '';
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { selectedCategoryId: this.selectedCategoryId || null },
+      replaceUrl: true,
+    });
     this.loadAssets();
   }
 

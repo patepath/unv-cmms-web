@@ -18,6 +18,7 @@ export class AssetForm implements OnInit {
   public isSaving = false;
   public errorMessage = '';
   private assetId: number | null = null;
+  private selectedCategoryId = 0;
 
   public assetForm = new FormGroup({
     id: new FormControl(0),
@@ -98,7 +99,6 @@ export class AssetForm implements OnInit {
     annuciator_brand: new FormControl(0),
 
     // ดับเพลิงชะลอ
-    
   });
 
   constructor(
@@ -106,10 +106,14 @@ export class AssetForm implements OnInit {
     private route: ActivatedRoute,
     private assetService: AssetService,
     private buildingService: BuildingService,
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
+    const selectedCategoryId = Number(this.route.snapshot.queryParamMap.get('selectedCategoryId'));
+    this.selectedCategoryId =
+      Number.isInteger(selectedCategoryId) && selectedCategoryId > 0 ? selectedCategoryId : 0;
+    this.assetForm.patchValue({ category_id: this.selectedCategoryId });
+
     this.buildingService.get().subscribe((buildings) => {
       this.buildings = buildings;
     });
@@ -149,12 +153,13 @@ export class AssetForm implements OnInit {
       status: 'ACTIVE',
     };
 
-    const request = this.assetId === null
-      ? this.assetService.create(draft)
-      : this.assetService.update(this.assetId, draft);
+    const request =
+      this.assetId === null
+        ? this.assetService.create(draft)
+        : this.assetService.update(this.assetId, draft);
 
     request.subscribe({
-      next: () => this.router.navigate(['/admin/assets-list']),
+      next: () => this.returnToAssetList(),
       error: (error: HttpErrorResponse) => {
         this.isSaving = false;
         this.errorMessage = error.error?.error ?? 'ไม่สามารถบันทึกข้อมูล asset ได้';
@@ -179,6 +184,12 @@ export class AssetForm implements OnInit {
   }
 
   public cancel(): void {
-    this.router.navigate(['/admin/assets-list']);
+    this.returnToAssetList();
+  }
+
+  private returnToAssetList(): void {
+    void this.router.navigate(['/admin/assets-list'], {
+      queryParams: { selectedCategoryId: this.selectedCategoryId || null },
+    });
   }
 }

@@ -20,7 +20,12 @@
       </select>
     </div>
 
-    <button class="add-button ms-1" type="button" [routerLink]="['/admin/asset-form']">
+    <button
+      class="add-button ms-1"
+      type="button"
+      [routerLink]="['/admin/asset-form']"
+      [queryParams]="{ selectedCategoryId: selectedCategoryId || null }"
+    >
       <span aria-hidden="true">+</span> เพิ่มข้อมูลเครื่องจักร
     </button>
   </div>
