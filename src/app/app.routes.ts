@@ -5,10 +5,9 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./components/login/login').then((m) => m.Login),
   },
-  {
-    path: 'equipment',
-    loadComponent: () => import('./components/equipment/equipment').then((m) => m.Equipment),
-  },
+  { path: 'equipment', loadComponent: () => import('./components/equipment/equipment').then((m) => m.Equipment), },
+  { path: 'om-phone-frm', loadComponent: () => import('./components/om-phone-form/om-phone-form').then((m) => m.OmPhoneForm), },
+  { path: 'pm-phone-frm', loadComponent: () => import('./components/pm-phone-form/pm-phone-form').then((m) => m.PmPhoneForm), },
   {
     path: 'equipment/:equipmentCode',
     loadComponent: () => import('./components/equipment/equipment').then((m) => m.Equipment),

@@ -1,0 +1,96 @@
+<main class="phone-page">
+  <header>
+    <button type="button" class="back-button" aria-label="กลับ" (click)="cancel()">‹</button>
+    <div>
+      <p>Preventive maintenance</p>
+      <h1>บันทึกงาน PM</h1>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <section class="status-card" role="status">กำลังโหลดข้อมูลเครื่องจักร...</section>
+  } @else if (asset(); as equipment) {
+    <section class="asset-card">
+      <span>{{ equipment.category.name || 'ไม่ระบุหมวดหมู่' }}</span>
+      <h2>{{ equipment.equipment_code }}</h2>
+      <dl>
+        <div>
+          <dt>อาคาร</dt>
+          <dd>{{ buildingLabel(equipment) }}</dd>
+        </div>
+        <div>
+          <dt>สถานที่</dt>
+          <dd>{{ equipment.location || '-' }}</dd>
+        </div>
+        <div>
+          <dt>ยี่ห้อ</dt>
+          <dd>{{ equipment.brand.name || '-' }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="date-time-row">
+        <label>
+          วันที่ทำงาน
+          <input type="date" formControlName="date" />
+        </label>
+        <label>
+          เวลา
+          <input type="time" formControlName="time" />
+        </label>
+      </div>
+
+      <div class="repeat-row">
+        <label>
+          รอบการทำซ้ำ
+          <select formControlName="repeatInterval">
+            <option value="none">ไม่ทำซ้ำ</option>
+            <option value="daily">ทุกวัน</option>
+            <option value="weekly">ทุกสัปดาห์</option>
+            <option value="every15days">ทุก 15 วัน</option>
+            <option value="monthly">ทุกเดือน</option>
+            <option value="quarterly">ทุก 3 เดือน</option>
+            <option value="halfYearly">ทุก 6 เดือน</option>
+            <option value="yearly">ทุกปี</option>
+          </select>
+        </label>
+        <label>
+          จำนวนครั้ง
+          <input
+            type="number"
+            min="1"
+            max="366"
+            formControlName="repeatCount"
+            [disabled]="form.controls.repeatInterval.value === 'none'"
+          />
+        </label>
+      </div>
+
+      <label>
+        รายการบำรุงรักษา
+        <textarea
+          rows="6"
+          formControlName="details"
+          placeholder="บันทึกการตรวจเช็ก การทำความสะอาด การเปลี่ยนชิ้นส่วน และผลการดำเนินงาน"
+        ></textarea>
+      </label>
+
+      @if (successMessage()) {
+        <div class="message success" role="status">{{ successMessage() }}</div>
+      }
+      @if (errorMessage()) {
+        <div class="message error" role="alert">{{ errorMessage() }}</div>
+      }
+
+      <button class="save-button" type="submit" [disabled]="isSaving()">
+        {{ isSaving() ? 'กำลังบันทึก...' : 'บันทึกงาน PM' }}
+      </button>
+      <button class="cancel-button" type="button" (click)="cancel()">
+        กลับไปหน้าข้อมูลเครื่องจักร
+      </button>
+    </form>
+  } @else {
+    <section class="status-card error" role="alert">{{ errorMessage() }}</section>
+  }
+</main>

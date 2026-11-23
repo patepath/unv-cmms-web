@@ -1,0 +1,199 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f3f6f4;
+  color: #17231f;
+}
+
+.phone-page {
+  width: min(100%, 480px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 18px 14px 32px;
+  box-sizing: border-box;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+header p {
+  margin: 0 0 3px;
+  color: #fa4616;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1,
+h2 {
+  margin: 0;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+.back-button {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 1px solid #d9e2dc;
+  border-radius: 12px;
+  background: #fff;
+  color: #26372f;
+  font-size: 30px;
+}
+
+.asset-card,
+form,
+.status-card {
+  border: 1px solid #dce5df;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 18px rgb(20 46 34 / 6%);
+}
+
+.asset-card {
+  margin-bottom: 14px;
+  padding: 16px;
+}
+
+.asset-card > span {
+  color: #fa4616;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.asset-card h2 {
+  margin-top: 4px;
+  font-size: 21px;
+}
+
+dl {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+dl > div {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 10px;
+}
+
+dt {
+  color: #74817b;
+  font-size: 12px;
+}
+
+dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+form {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+label {
+  display: grid;
+  gap: 7px;
+  color: #4b5a53;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cfdad3;
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: #fff;
+  color: #17231f;
+  font: inherit;
+  font-size: 16px;
+}
+
+input {
+  min-height: 46px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #fa4616;
+  outline: 3px solid rgb(250 70 22 / 14%);
+}
+
+.time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.message,
+.status-card {
+  padding: 13px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.message {
+  border-radius: 10px;
+}
+
+.message.success {
+  background: #eaf7ee;
+  color: #286d3e;
+}
+
+.message.error,
+.status-card.error {
+  background: #fff0eb;
+  color: #a3371b;
+}
+
+.save-button,
+.cancel-button {
+  min-height: 48px;
+  border-radius: 11px;
+  font: inherit;
+  font-weight: 750;
+}
+
+.save-button {
+  border: 0;
+  background: #fa4616;
+  color: #fff;
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+}
+
+.cancel-button {
+  border: 1px solid #d7e0da;
+  background: #fff;
+  color: #4d5d55;
+}
+
+@media (max-width: 360px) {
+  .time-row {
+    grid-template-columns: 1fr;
+  }
+}

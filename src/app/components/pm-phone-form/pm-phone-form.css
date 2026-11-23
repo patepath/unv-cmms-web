@@ -1,0 +1,22 @@
+@import '../om-phone-form/om-phone-form.css';
+
+.date-time-row,
+.repeat-row {
+  display: grid;
+  gap: 10px;
+}
+
+.date-time-row {
+  grid-template-columns: 1.3fr 1fr;
+}
+
+.repeat-row {
+  grid-template-columns: minmax(0, 1.6fr) minmax(100px, 0.8fr);
+}
+
+@media (max-width: 360px) {
+  .date-time-row,
+  .repeat-row {
+    grid-template-columns: 1fr;
+  }
+}

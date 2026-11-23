@@ -1,0 +1,75 @@
+<main class="phone-page">
+  <header>
+    <button type="button" class="back-button" aria-label="กลับ" (click)="cancel()">‹</button>
+    <div>
+      <p>Operative maintenance</p>
+      <h1>บันทึกงาน OM</h1>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <section class="status-card" role="status">กำลังโหลดข้อมูลเครื่องจักร...</section>
+  } @else if (asset(); as equipment) {
+    <section class="asset-card">
+      <span>{{ equipment.category.name || 'ไม่ระบุหมวดหมู่' }}</span>
+      <h2>{{ equipment.equipment_code }}</h2>
+      <dl>
+        <div>
+          <dt>อาคาร</dt>
+          <dd>{{ buildingLabel(equipment) }}</dd>
+        </div>
+        <div>
+          <dt>สถานที่</dt>
+          <dd>{{ equipment.location || '-' }}</dd>
+        </div>
+        <div>
+          <dt>ยี่ห้อ</dt>
+          <dd>{{ equipment.brand.name || '-' }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <label>
+        วันที่ทำงาน
+        <input type="date" formControlName="date" />
+      </label>
+
+      <div class="time-row">
+        <label>
+          เวลาเริ่มต้น
+          <input type="time" formControlName="startTime" />
+        </label>
+        <label>
+          เวลาสิ้นสุด
+          <input type="time" formControlName="endTime" />
+        </label>
+      </div>
+
+      <label>
+        รายละเอียดงาน
+        <textarea
+          rows="6"
+          formControlName="details"
+          placeholder="บันทึกอาการ งานที่ดำเนินการ และผลการตรวจสอบ"
+        ></textarea>
+      </label>
+
+      @if (successMessage()) {
+        <div class="message success" role="status">{{ successMessage() }}</div>
+      }
+      @if (errorMessage()) {
+        <div class="message error" role="alert">{{ errorMessage() }}</div>
+      }
+
+      <button class="save-button" type="submit" [disabled]="isSaving()">
+        {{ isSaving() ? 'กำลังบันทึก...' : 'บันทึกงาน OM' }}
+      </button>
+      <button class="cancel-button" type="button" (click)="cancel()">
+        กลับไปหน้าข้อมูลเครื่องจักร
+      </button>
+    </form>
+  } @else {
+    <section class="status-card error" role="alert">{{ errorMessage() }}</section>
+  }
+</main>

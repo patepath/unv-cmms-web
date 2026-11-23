@@ -13,10 +13,10 @@
 
       <div class="form-group mt-2" style="width: 10rem">
         <label for="code">รหัสเครื่องจักร</label>
-        <input type="text" class="form-control" id="code" formControlName="code" placeholder="" />
+        <input type="text" class="form-control" id="code" formControlName="equipment_code" placeholder="" />
       </div>
 
-      <div class="form-group mt-2" style="width: 40rem">
+      <div class="form-group mt-2 w-50" >
         <label for="building">อาคาร</label>
         <div class="building-selector">
           <select
@@ -49,6 +49,7 @@
                 <th style="width: 6rem; text-align: center">จัดการ</th>
               </tr>
             </thead>
+
             <tbody>
               @for (building of selectedBuildings; track building.id) {
                 <tr>

@@ -37,7 +37,7 @@ export class AssetForm implements OnInit, OnDestroy {
   public assetForm = new FormGroup({
     id: new FormControl(0),
     category_id: new FormControl(0),
-    code: new FormControl(''),
+    equipment_code: new FormControl(''),
     building_ids: new FormControl<number[]>([]),
     location: new FormControl(''),
     floor: new FormControl(''),
@@ -159,6 +159,7 @@ export class AssetForm implements OnInit, OnDestroy {
 
     this.route.queryParamMap.subscribe((params) => {
       const id = Number(params.get('id'));
+
       if (id > 0) {
         this.assetId = id;
         this.assetService.get(id).subscribe({
@@ -186,6 +187,7 @@ export class AssetForm implements OnInit, OnDestroy {
     const value = this.assetForm.getRawValue();
     const draft: AssetDraft = {
       category_id: value.category_id || null,
+      equipment_code: value.equipment_code ?? '',
       location: value.location ?? '',
       floor: value.floor ?? '',
       asset_no: value.no ?? '',
@@ -214,7 +216,7 @@ export class AssetForm implements OnInit, OnDestroy {
   private populateForm(asset: Asset): void {
     this.assetForm.patchValue({
       id: asset.id,
-      code: asset.asset_no,
+      equipment_code: asset.equipment_code,
       building_ids: asset.buildings.map((building) => building.id),
       location: asset.location,
       floor: asset.floor,
@@ -223,12 +225,14 @@ export class AssetForm implements OnInit, OnDestroy {
       engine_model: asset.model,
       unit_number: Number(asset.unit_number) || 0,
     });
+
     this.assetForm.controls.category_id.setValue(asset.category_id ?? 0, { emitEvent: false });
     this.loadBrands(asset.category_id ?? 0, asset.brand_id ?? 0);
   }
 
   public get selectedBuildings(): Building[] {
     const selectedIds = new Set(this.assetForm.controls.building_ids.value ?? []);
+
     return this.buildings
       .filter((building) => selectedIds.has(building.id))
       .sort((a, b) => a.code.localeCompare(b.code, 'th'));
