@@ -48,11 +48,16 @@
           [class.today]="day.isToday"
           [class.selected]="selectedDate() === day.key"
           (click)="selectDay(day)"
+          (dblclick)="createForDay(day)"
         >
           <span class="day-number">{{ day.number }}</span>
           <span class="day-events">
             @for (record of recordsForDate(day.key); track record.id) {
-              <span class="calendar-event">
+              <span
+                class="calendar-event"
+                (click)="editRecord(record, $event)"
+                (dblclick)="$event.stopPropagation()"
+              >
                 <span class="event-time">{{ timeLabel(record) }}</span>
                 <span>{{ assetLabel(record) }}</span>
               </span>
@@ -76,7 +81,7 @@
     } @else {
       <div class="selected-events">
         @for (record of selectedRecords(); track record.id) {
-          <article>
+          <article role="button" tabindex="0" (click)="editRecord(record)">
             <strong>{{ timeLabel(record) }}</strong>
             <div>
               <h3>{{ assetLabel(record) }}</h3>
@@ -99,8 +104,12 @@
       >
         <div class="dialog-heading">
           <div>
-            <p class="page-kicker">สร้างงานใหม่</p>
-            <h2 id="event-title">เพิ่มงาน PM</h2>
+            <p class="page-kicker">
+              {{ editingRecordId() === null ? 'สร้างงานใหม่' : 'แก้ไขงานเดิม' }}
+            </p>
+            <h2 id="event-title">
+              {{ editingRecordId() === null ? 'เพิ่มงาน PM' : 'แก้ไขงาน PM' }}
+            </h2>
           </div>
           <button type="button" class="close-button" aria-label="ปิด" (click)="closeForm()">
             ×
@@ -132,7 +141,7 @@
           <div class="repeat-row">
             <label>
               ทำซ้ำ
-              <select formControlName="repeatInterval">
+              <select formControlName="repeatInterval" [disabled]="editingRecordId() !== null">
                 <option value="none">ไม่ทำซ้ำ</option>
                 <option value="daily">ทุกวัน</option>
                 <option value="weekly">ทุกสัปดาห์</option>
@@ -150,7 +159,9 @@
                 min="1"
                 max="366"
                 formControlName="repeatCount"
-                [disabled]="planForm.controls.repeatInterval.value === 'none'"
+                [disabled]="
+                  planForm.controls.repeatInterval.value === 'none' || editingRecordId() !== null
+                "
               />
             </label>
           </div>
@@ -170,7 +181,13 @@
           <div class="dialog-actions">
             <button type="button" class="secondary-button" (click)="closeForm()">ยกเลิก</button>
             <button type="submit" class="primary-button" [disabled]="isSaving()">
-              {{ isSaving() ? 'กำลังบันทึก...' : 'บันทึกงาน PM' }}
+              {{
+                isSaving()
+                  ? 'กำลังบันทึก...'
+                  : editingRecordId() === null
+                    ? 'บันทึกงาน PM'
+                    : 'บันทึกการแก้ไข'
+              }}
             </button>
           </div>
         </form>

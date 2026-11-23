@@ -39,6 +39,7 @@ export class OperativeMaintenance {
   protected readonly isLoading = signal(true);
   protected readonly isSaving = signal(false);
   protected readonly errorMessage = signal('');
+  protected readonly editingRecordId = signal<number | null>(null);
 
   protected readonly eventForm = this.formBuilder.nonNullable.group({
     assetId: [0, Validators.min(1)],
@@ -117,21 +118,45 @@ export class OperativeMaintenance {
   protected selectDay(day: CalendarDay): void {
     this.selectedDate.set(day.key);
     this.visibleDate.set(day.date);
-    this.eventForm.patchValue({ date: day.key });
+  }
+
+  protected createForDay(day: CalendarDay): void {
+    this.selectedDate.set(day.key);
+    this.visibleDate.set(day.date);
+    this.openForm(day.key);
+  }
+
+  protected editRecord(record: ServiceRecord, event?: Event): void {
+    event?.stopPropagation();
+    const start = new Date(record.serviceDate);
+    const end = record.endDate ? new Date(record.endDate) : new Date(start.getTime() + 3600000);
+    this.editingRecordId.set(record.id);
+    this.selectedDate.set(this.dateKey(start));
+    this.eventForm.patchValue({
+      assetId: record.assetId,
+      date: this.dateKey(start),
+      startTime: this.timeInputValue(start),
+      endTime: this.timeInputValue(end),
+      details: record.details,
+    });
     this.isFormOpen.set(true);
   }
 
-  protected openForm(): void {
+  protected openForm(date = this.selectedDate()): void {
+    this.editingRecordId.set(null);
     this.eventForm.patchValue({
-      date: this.selectedDate(),
+      assetId: 0,
+      date,
       startTime: '08:00',
       endTime: '09:00',
+      details: '',
     });
     this.isFormOpen.set(true);
   }
 
   protected closeForm(): void {
     this.isFormOpen.set(false);
+    this.editingRecordId.set(null);
   }
 
   protected saveEvent(): void {
@@ -147,27 +172,37 @@ export class OperativeMaintenance {
     }
     this.isSaving.set(true);
     this.errorMessage.set('');
-    this.serviceRecordService
-      .create({
-        assetId: value.assetId,
-        recordType: 'OM',
-        serviceDate: `${value.date}T${value.startTime}:00`,
-        endDate: `${value.date}T${value.endTime}:00`,
-        details: value.details.trim(),
-      })
-      .subscribe({
-        next: (record) => {
-          this.records.update((records) => [...records, record]);
-          this.selectedDate.set(value.date);
-          this.isSaving.set(false);
-          this.isFormOpen.set(false);
-          this.eventForm.patchValue({ details: '' });
-        },
-        error: (error: HttpErrorResponse) => {
-          this.errorMessage.set(error.error?.error ?? 'ไม่สามารถบันทึกงาน OM ได้');
-          this.isSaving.set(false);
-        },
-      });
+    const draft = {
+      assetId: value.assetId,
+      recordType: 'OM' as const,
+      serviceDate: this.toISOString(value.date, value.startTime),
+      endDate: this.toISOString(value.date, value.endTime),
+      details: value.details.trim(),
+    };
+    const editingId = this.editingRecordId();
+    const request =
+      editingId === null
+        ? this.serviceRecordService.create(draft)
+        : this.serviceRecordService.update(editingId, draft);
+
+    request.subscribe({
+      next: (record) => {
+        this.records.update((records) => [
+          ...records.filter((current) => current.id !== record.id),
+          record,
+        ]);
+        this.selectedDate.set(value.date);
+        this.visibleDate.set(this.parseDateKey(value.date));
+        this.isSaving.set(false);
+        this.isFormOpen.set(false);
+        this.editingRecordId.set(null);
+        this.eventForm.patchValue({ details: '' });
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage.set(error.error?.error ?? 'ไม่สามารถบันทึกงาน OM ได้');
+        this.isSaving.set(false);
+      },
+    });
   }
 
   protected recordsForDate(date: string): ServiceRecord[] {
@@ -252,9 +287,16 @@ export class OperativeMaintenance {
 
   private loadRecords(): void {
     this.isLoading.set(true);
+    this.errorMessage.set('');
     this.serviceRecordService.get('OM').subscribe({
       next: (records) => {
-        this.records.set(records);
+        this.records.set([...records].sort((a, b) => a.serviceDate.localeCompare(b.serviceDate)));
+        const nearestRecord = this.nearestRecord(records);
+        if (nearestRecord) {
+          const date = new Date(nearestRecord.serviceDate);
+          this.visibleDate.set(date);
+          this.selectedDate.set(this.dateKey(date));
+        }
         this.isLoading.set(false);
       },
       error: (error: HttpErrorResponse) => {
@@ -262,5 +304,22 @@ export class OperativeMaintenance {
         this.isLoading.set(false);
       },
     });
+  }
+
+  private nearestRecord(records: ServiceRecord[]): ServiceRecord | undefined {
+    const todayKey = this.dateKey(new Date());
+    const sorted = [...records].sort((a, b) => a.serviceDate.localeCompare(b.serviceDate));
+    return (
+      sorted.find((record) => this.dateKey(new Date(record.serviceDate)) >= todayKey) ??
+      sorted.at(-1)
+    );
+  }
+
+  private toISOString(date: string, time: string): string {
+    return new Date(`${date}T${time}:00`).toISOString();
+  }
+
+  private timeInputValue(date: Date): string {
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 }

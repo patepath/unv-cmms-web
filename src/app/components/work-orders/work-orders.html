@@ -29,6 +29,10 @@
     </div>
   </header>
 
+  @if (errorMessage() && !isFormOpen()) {
+    <div class="error-banner" role="alert">{{ errorMessage() }}</div>
+  }
+
   <section class="calendar" aria-label="ปฏิทินใบสั่งงาน">
     <div class="weekdays">
       @for (weekday of weekdays; track weekday) {
@@ -44,11 +48,17 @@
           [class.today]="day.isToday"
           [class.selected]="selectedDate() === day.key"
           (click)="selectDay(day)"
+          (dblclick)="createForDay(day)"
         >
           <span class="day-number">{{ day.number }}</span>
           <span class="day-events">
             @for (order of ordersForDate(day.key); track order.id) {
-              <span class="calendar-event" [class.high]="order.priority === 'High'">
+              <span
+                class="calendar-event"
+                [class.high]="order.priority === 'High'"
+                (click)="editOrder(order, $event)"
+                (dblclick)="$event.stopPropagation()"
+              >
                 <span class="event-time">{{ order.time }}</span>
                 <span>{{ order.title }}</span>
               </span>
@@ -72,7 +82,7 @@
     } @else {
       <div class="selected-events">
         @for (order of selectedOrders(); track order.id) {
-          <article>
+          <article role="button" tabindex="0" (click)="editOrder(order)">
             <strong>{{ order.time }}</strong>
             <div>
               <h3>{{ order.title }}</h3>
@@ -83,7 +93,7 @@
                 </span>
                 <span>{{ order.status }}</span>
                 @if (order.status !== 'Completed') {
-                  <button type="button" (click)="advanceStatus(order)">เปลี่ยนสถานะ</button>
+                  <button type="button" (click)="advanceStatus(order, $event)">เปลี่ยนสถานะ</button>
                 }
               </div>
             </div>
@@ -104,8 +114,12 @@
       >
         <div class="dialog-heading">
           <div>
-            <p class="page-kicker">สร้างใบสั่งงาน</p>
-            <h2 id="event-title">เพิ่ม Work Order</h2>
+            <p class="page-kicker">
+              {{ editingOrderId() === null ? 'สร้างใบสั่งงาน' : 'แก้ไขใบสั่งงาน' }}
+            </p>
+            <h2 id="event-title">
+              {{ editingOrderId() === null ? 'เพิ่ม Work Order' : 'แก้ไข Work Order' }}
+            </h2>
           </div>
           <button type="button" class="close-button" aria-label="ปิด" (click)="closeForm()">
             ×
@@ -151,10 +165,25 @@
           </div>
           <div class="dialog-actions">
             <button type="button" class="secondary-button" (click)="closeForm()">ยกเลิก</button>
-            <button type="submit" class="primary-button">บันทึกใบสั่งงาน</button>
+            @if (errorMessage()) {
+              <div class="error-banner" role="alert">{{ errorMessage() }}</div>
+            }
+            <button type="submit" class="primary-button" [disabled]="isSaving()">
+              {{
+                isSaving()
+                  ? 'กำลังบันทึก...'
+                  : editingOrderId() === null
+                    ? 'บันทึกใบสั่งงาน'
+                    : 'บันทึกการแก้ไข'
+              }}
+            </button>
           </div>
         </form>
       </section>
     </div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading-overlay" role="status">กำลังโหลดใบสั่งงาน...</div>
   }
 </div>

@@ -38,4 +38,12 @@ export class ServiceRecordService {
   ): Observable<ServiceRecord[]> {
     return this.http.post<ServiceRecord[]>(`${this.url}repeat`, draft);
   }
+
+  update(
+    id: number,
+    draft: Pick<ServiceRecord, 'assetId' | 'recordType' | 'serviceDate' | 'details'> &
+      Partial<Pick<ServiceRecord, 'endDate'>>,
+  ): Observable<ServiceRecord> {
+    return this.http.put<ServiceRecord>(`${this.url}${id}`, draft);
+  }
 }

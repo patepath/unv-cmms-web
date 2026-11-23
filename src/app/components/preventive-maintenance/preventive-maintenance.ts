@@ -39,6 +39,7 @@ export class PreventiveMaintenance {
   protected readonly isLoading = signal(true);
   protected readonly isSaving = signal(false);
   protected readonly errorMessage = signal('');
+  protected readonly editingRecordId = signal<number | null>(null);
 
   protected readonly planForm = this.formBuilder.nonNullable.group({
     assetId: [0, Validators.min(1)],
@@ -111,17 +112,46 @@ export class PreventiveMaintenance {
   protected selectDay(day: CalendarDay): void {
     this.selectedDate.set(day.key);
     this.visibleDate.set(day.date);
-    this.planForm.patchValue({ date: day.key });
+  }
+
+  protected createForDay(day: CalendarDay): void {
+    this.selectedDate.set(day.key);
+    this.visibleDate.set(day.date);
+    this.openForm(day.key);
+  }
+
+  protected editRecord(record: ServiceRecord, event?: Event): void {
+    event?.stopPropagation();
+    const date = new Date(record.serviceDate);
+    this.editingRecordId.set(record.id);
+    this.selectedDate.set(this.dateKey(date));
+    this.planForm.patchValue({
+      assetId: record.assetId,
+      date: this.dateKey(date),
+      time: this.timeInputValue(date),
+      repeatInterval: 'none',
+      repeatCount: 1,
+      details: record.details,
+    });
     this.isFormOpen.set(true);
   }
 
-  protected openForm(): void {
-    this.planForm.patchValue({ date: this.selectedDate(), time: '09:00' });
+  protected openForm(date = this.selectedDate()): void {
+    this.editingRecordId.set(null);
+    this.planForm.patchValue({
+      assetId: 0,
+      date,
+      time: '09:00',
+      repeatInterval: 'none',
+      repeatCount: 1,
+      details: '',
+    });
     this.isFormOpen.set(true);
   }
 
   protected closeForm(): void {
     this.isFormOpen.set(false);
+    this.editingRecordId.set(null);
   }
 
   protected savePlan(): void {
@@ -135,24 +165,34 @@ export class PreventiveMaintenance {
     const draft = {
       assetId: value.assetId,
       recordType: 'PM' as const,
-      serviceDate: `${value.date}T${value.time}:00`,
+      serviceDate: this.toISOString(value.date, value.time),
       details: value.details.trim(),
     };
+    const editingId = this.editingRecordId();
     const request =
-      value.repeatInterval === 'none'
-        ? this.serviceRecordService.create(draft).pipe(map((record) => [record]))
-        : this.serviceRecordService.createRepeated({
-            ...draft,
-            repeatInterval: value.repeatInterval,
-            repeatCount: value.repeatCount,
-          });
+      editingId !== null
+        ? this.serviceRecordService.update(editingId, draft).pipe(map((record) => [record]))
+        : value.repeatInterval === 'none'
+          ? this.serviceRecordService.create(draft).pipe(map((record) => [record]))
+          : this.serviceRecordService.createRepeated({
+              ...draft,
+              repeatInterval: value.repeatInterval,
+              repeatCount: value.repeatCount,
+            });
 
     request.subscribe({
       next: (createdRecords) => {
-        this.records.update((records) => [...records, ...createdRecords]);
+        const createdIds = new Set(createdRecords.map((record) => record.id));
+        this.records.update((records) =>
+          [...records.filter((record) => !createdIds.has(record.id)), ...createdRecords].sort(
+            (a, b) => a.serviceDate.localeCompare(b.serviceDate),
+          ),
+        );
         this.selectedDate.set(value.date);
+        this.visibleDate.set(this.parseDateKey(value.date));
         this.isSaving.set(false);
         this.isFormOpen.set(false);
+        this.editingRecordId.set(null);
         this.planForm.patchValue({ details: '' });
       },
       error: (error: HttpErrorResponse) => {
@@ -231,9 +271,17 @@ export class PreventiveMaintenance {
   }
 
   private loadRecords(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
     this.serviceRecordService.get('PM').subscribe({
       next: (records) => {
-        this.records.set(records);
+        this.records.set([...records].sort((a, b) => a.serviceDate.localeCompare(b.serviceDate)));
+        const nearestRecord = this.nearestRecord(records);
+        if (nearestRecord) {
+          const date = new Date(nearestRecord.serviceDate);
+          this.visibleDate.set(date);
+          this.selectedDate.set(this.dateKey(date));
+        }
         this.isLoading.set(false);
       },
       error: (error: HttpErrorResponse) => {
@@ -241,5 +289,22 @@ export class PreventiveMaintenance {
         this.isLoading.set(false);
       },
     });
+  }
+
+  private nearestRecord(records: ServiceRecord[]): ServiceRecord | undefined {
+    const todayKey = this.dateKey(new Date());
+    const sorted = [...records].sort((a, b) => a.serviceDate.localeCompare(b.serviceDate));
+    return (
+      sorted.find((record) => this.dateKey(new Date(record.serviceDate)) >= todayKey) ??
+      sorted.at(-1)
+    );
+  }
+
+  private toISOString(date: string, time: string): string {
+    return new Date(`${date}T${time}:00`).toISOString();
+  }
+
+  private timeInputValue(date: Date): string {
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 }

@@ -1,25 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { WorkOrder, WorkOrderService, WorkOrderStatus } from '../../services/work-order.service';
 
 type CalendarView = 'week' | 'month';
-type WorkOrderStatus = 'Open' | 'Assigned' | 'In progress' | 'Completed';
 type CalendarDay = {
   date: Date;
   key: string;
   number: number;
   isCurrentMonth: boolean;
   isToday: boolean;
-};
-
-type WorkOrder = {
-  id: string;
-  title: string;
-  asset: string;
-  priority: 'Low' | 'Medium' | 'High';
-  assignee: string;
-  status: WorkOrderStatus;
-  scheduledDate: string;
-  time: string;
 };
 
 @Component({
@@ -31,6 +21,7 @@ type WorkOrder = {
 })
 export class WorkOrders {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly workOrderService = inject(WorkOrderService);
   private readonly today = new Date();
 
   protected readonly weekdays = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
@@ -39,38 +30,11 @@ export class WorkOrders {
   protected readonly visibleDate = signal(new Date());
   protected readonly selectedDate = signal(this.dateKey(new Date()));
   protected readonly isFormOpen = signal(false);
-  protected readonly workOrders = signal<WorkOrder[]>([
-    {
-      id: 'WO-1048',
-      title: 'Inspect cooling system vibration',
-      asset: 'HVAC / Building A',
-      priority: 'High',
-      assignee: 'Narin K.',
-      status: 'In progress',
-      scheduledDate: this.dateKey(this.today),
-      time: '09:00',
-    },
-    {
-      id: 'WO-1047',
-      title: 'Replace worn conveyor belt',
-      asset: 'Line 03 / Workshop',
-      priority: 'Medium',
-      assignee: 'Mali P.',
-      status: 'Assigned',
-      scheduledDate: this.dateKey(this.addDays(this.today, 2)),
-      time: '13:30',
-    },
-    {
-      id: 'WO-1046',
-      title: 'Repair loading dock sensor',
-      asset: 'Dock 02 / Warehouse',
-      priority: 'Low',
-      assignee: 'Somchai T.',
-      status: 'Completed',
-      scheduledDate: this.dateKey(this.addDays(this.today, -1)),
-      time: '10:00',
-    },
-  ]);
+  protected readonly isLoading = signal(true);
+  protected readonly isSaving = signal(false);
+  protected readonly errorMessage = signal('');
+  protected readonly editingOrderId = signal<number | null>(null);
+  protected readonly workOrders = signal<WorkOrder[]>([]);
 
   protected readonly requestForm = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(80)]],
@@ -112,6 +76,10 @@ export class WorkOrders {
     this.ordersForDate(this.selectedDate()).sort((a, b) => a.time.localeCompare(b.time)),
   );
 
+  constructor() {
+    this.loadWorkOrders();
+  }
+
   protected setView(view: CalendarView): void {
     this.view.set(view);
   }
@@ -132,17 +100,45 @@ export class WorkOrders {
   protected selectDay(day: CalendarDay): void {
     this.selectedDate.set(day.key);
     this.visibleDate.set(day.date);
-    this.requestForm.patchValue({ date: day.key });
+  }
+
+  protected createForDay(day: CalendarDay): void {
+    this.selectedDate.set(day.key);
+    this.visibleDate.set(day.date);
+    this.openForm(day.key);
+  }
+
+  protected editOrder(order: WorkOrder, event?: Event): void {
+    event?.stopPropagation();
+    this.editingOrderId.set(order.id);
+    this.selectedDate.set(order.scheduledDate);
+    this.requestForm.patchValue({
+      title: order.title,
+      asset: order.asset,
+      date: order.scheduledDate,
+      time: order.time,
+      priority: order.priority,
+      assignee: order.assignee,
+    });
     this.isFormOpen.set(true);
   }
 
-  protected openForm(): void {
-    this.requestForm.patchValue({ date: this.selectedDate(), time: '09:00' });
+  protected openForm(date = this.selectedDate()): void {
+    this.editingOrderId.set(null);
+    this.requestForm.reset({
+      title: '',
+      asset: '',
+      date,
+      time: '09:00',
+      priority: 'Medium',
+      assignee: 'Unassigned',
+    });
     this.isFormOpen.set(true);
   }
 
   protected closeForm(): void {
     this.isFormOpen.set(false);
+    this.editingOrderId.set(null);
   }
 
   protected createWorkOrder(): void {
@@ -152,29 +148,53 @@ export class WorkOrders {
     }
 
     const value = this.requestForm.getRawValue();
-    const current = this.workOrders();
-    this.workOrders.set([
-      ...current,
-      {
-        id: `WO-${1049 + current.length}`,
-        title: value.title.trim(),
-        asset: value.asset.trim(),
-        priority: value.priority,
-        assignee: value.assignee,
-        status: value.assignee === 'Unassigned' ? 'Open' : 'Assigned',
-        scheduledDate: value.date,
-        time: value.time,
+    this.isSaving.set(true);
+    this.errorMessage.set('');
+    const draft = {
+      title: value.title.trim(),
+      asset: value.asset.trim(),
+      priority: value.priority,
+      assignee: value.assignee,
+      status:
+        this.editingOrderId() === null
+          ? value.assignee === 'Unassigned'
+            ? ('Open' as const)
+            : ('Assigned' as const)
+          : (this.workOrders().find((order) => order.id === this.editingOrderId())?.status ??
+            ('Open' as const)),
+      scheduledDate: value.date,
+      time: value.time,
+    };
+    const editingId = this.editingOrderId();
+    const request =
+      editingId === null
+        ? this.workOrderService.create(draft)
+        : this.workOrderService.update(editingId, draft);
+
+    request.subscribe({
+      next: (workOrder) => {
+        this.workOrders.update((orders) => [
+          ...orders.filter((current) => current.id !== workOrder.id),
+          { ...workOrder, scheduledDate: workOrder.scheduledDate.slice(0, 10) },
+        ]);
+        this.selectedDate.set(value.date);
+        this.visibleDate.set(this.parseDateKey(value.date));
+        this.isSaving.set(false);
+        this.isFormOpen.set(false);
+        this.editingOrderId.set(null);
+        this.requestForm.reset({
+          title: '',
+          asset: '',
+          date: value.date,
+          time: '09:00',
+          priority: 'Medium',
+          assignee: 'Unassigned',
+        });
       },
-    ]);
-    this.selectedDate.set(value.date);
-    this.isFormOpen.set(false);
-    this.requestForm.reset({
-      title: '',
-      asset: '',
-      date: value.date,
-      time: '09:00',
-      priority: 'Medium',
-      assignee: 'Unassigned',
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage.set(error.error?.error ?? 'ไม่สามารถบันทึกใบสั่งงานได้');
+        this.isSaving.set(false);
+      },
     });
   }
 
@@ -191,18 +211,23 @@ export class WorkOrders {
     }).format(this.parseDateKey(this.selectedDate()));
   }
 
-  protected advanceStatus(order: WorkOrder): void {
+  protected advanceStatus(order: WorkOrder, event?: Event): void {
+    event?.stopPropagation();
     const nextStatuses: Record<WorkOrderStatus, WorkOrderStatus> = {
       Open: 'Assigned',
       Assigned: 'In progress',
       'In progress': 'Completed',
       Completed: 'Completed',
     };
-    this.workOrders.update((orders) =>
-      orders.map((current) =>
-        current.id === order.id ? { ...current, status: nextStatuses[current.status] } : current,
-      ),
-    );
+    const status = nextStatuses[order.status];
+    this.workOrderService.update(order.id, { status }).subscribe({
+      next: (updatedOrder) =>
+        this.workOrders.update((orders) =>
+          orders.map((current) => (current.id === updatedOrder.id ? updatedOrder : current)),
+        ),
+      error: (error: HttpErrorResponse) =>
+        this.errorMessage.set(error.error?.error ?? 'ไม่สามารถอัปเดตสถานะได้'),
+    });
   }
 
   private movePeriod(direction: number): void {
@@ -222,10 +247,35 @@ export class WorkOrders {
     return result;
   }
 
-  private addDays(date: Date, amount: number): Date {
-    const result = new Date(date);
-    result.setDate(result.getDate() + amount);
-    return result;
+  private loadWorkOrders(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.workOrderService.get().subscribe({
+      next: (workOrders) => {
+        const normalizedOrders = workOrders.map((workOrder) => ({
+          ...workOrder,
+          scheduledDate: workOrder.scheduledDate.slice(0, 10),
+        }));
+        this.workOrders.set(normalizedOrders);
+        const nearestOrder = this.nearestWorkOrder(normalizedOrders);
+        if (nearestOrder) {
+          const date = this.parseDateKey(nearestOrder.scheduledDate);
+          this.visibleDate.set(date);
+          this.selectedDate.set(nearestOrder.scheduledDate);
+        }
+        this.isLoading.set(false);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage.set(error.error?.error ?? 'ไม่สามารถโหลดใบสั่งงานได้');
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  private nearestWorkOrder(workOrders: WorkOrder[]): WorkOrder | undefined {
+    const todayKey = this.dateKey(new Date());
+    const sorted = [...workOrders].sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
+    return sorted.find((workOrder) => workOrder.scheduledDate >= todayKey) ?? sorted.at(-1);
   }
 
   private dateKey(date: Date): string {
