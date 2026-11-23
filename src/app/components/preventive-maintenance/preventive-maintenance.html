@@ -1,103 +1,184 @@
-<div class="preventive-page">
-  <section class="page-intro">
+<div class="operative-page">
+  <header class="calendar-toolbar">
     <div>
-      <p class="page-kicker">Scheduled care</p>
-      <h2>Preventive maintenance</h2>
-      <p>Plan recurring service tasks before equipment issues become disruptions.</p>
+      <p class="page-kicker">Preventive maintenance</p>
+      <h1>{{ calendarTitle() }}</h1>
     </div>
-    <div class="summary-chip">
-      <strong>{{ upcomingCount() }}</strong> upcoming plans
+    <div class="toolbar-actions">
+      <button type="button" class="secondary-button" (click)="goToToday()">วันนี้</button>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="ช่วงก่อนหน้า"
+        (click)="previousPeriod()"
+      >
+        ‹
+      </button>
+      <button type="button" class="icon-button" aria-label="ช่วงถัดไป" (click)="nextPeriod()">
+        ›
+      </button>
+      <div class="view-switch" aria-label="รูปแบบปฏิทิน">
+        <button type="button" [class.active]="view() === 'week'" (click)="setView('week')">
+          สัปดาห์
+        </button>
+        <button type="button" [class.active]="view() === 'month'" (click)="setView('month')">
+          เดือน
+        </button>
+      </div>
+      <button type="button" class="primary-button" (click)="openForm()">+ เพิ่ม PM</button>
+    </div>
+  </header>
+
+  @if (errorMessage() && !isFormOpen()) {
+    <div class="error-banner" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <section class="calendar" aria-label="ปฏิทินงาน PM">
+    <div class="weekdays">
+      @for (weekday of weekdays; track weekday) {
+        <div>{{ weekday }}</div>
+      }
+    </div>
+    <div class="calendar-grid" [class.week-view]="view() === 'week'">
+      @for (day of calendarDays(); track day.key) {
+        <button
+          type="button"
+          class="calendar-day"
+          [class.outside]="!day.isCurrentMonth"
+          [class.today]="day.isToday"
+          [class.selected]="selectedDate() === day.key"
+          (click)="selectDay(day)"
+        >
+          <span class="day-number">{{ day.number }}</span>
+          <span class="day-events">
+            @for (record of recordsForDate(day.key); track record.id) {
+              <span class="calendar-event">
+                <span class="event-time">{{ timeLabel(record) }}</span>
+                <span>{{ assetLabel(record) }}</span>
+              </span>
+            }
+          </span>
+        </button>
+      }
     </div>
   </section>
 
-  <section class="planning-grid">
-    <form class="plan-panel" [formGroup]="planForm" (ngSubmit)="createPlan()">
-      <div class="panel-heading">
-        <div>
-          <p class="section-kicker">New schedule</p>
-          <h3>Create maintenance plan</h3>
-        </div>
-        <span class="calendar-mark" aria-hidden="true">↗</span>
+  <section class="selected-day-panel">
+    <div class="selected-day-heading">
+      <div>
+        <p class="page-kicker">งานที่เลือก</p>
+        <h2>{{ selectedDateLabel() }}</h2>
       </div>
-
-      <label>
-        Service task
-        <input formControlName="task" placeholder="e.g. Inspect safety guards" />
-      </label>
-      @if (planForm.controls.task.invalid && planForm.controls.task.touched) {
-        <small class="field-error">Add a recurring service task.</small>
-      }
-
-      <label>
-        Asset or location
-        <input formControlName="asset" placeholder="e.g. Generator 02 / Building B" />
-      </label>
-      @if (planForm.controls.asset.invalid && planForm.controls.asset.touched) {
-        <small class="field-error">Add an asset or location.</small>
-      }
-
-      <div class="form-row">
-        <label>
-          Repeat every
-          <select formControlName="cadence">
-            @for (cadence of cadences; track cadence) {
-              <option [value]="cadence">{{ cadence }}</option>
-            }
-          </select>
-        </label>
-        <label>
-          Next service
-          <input formControlName="nextService" type="date" />
-        </label>
-      </div>
-
-      <label>
-        Assign technician
-        <select formControlName="assignee">
-          @for (technician of technicians; track technician) {
-            <option [value]="technician">{{ technician }}</option>
-          }
-        </select>
-      </label>
-
-      <button class="create-button" type="submit">
-        Add to schedule <span aria-hidden="true">→</span>
-      </button>
-    </form>
-
-    <section class="schedule-panel" aria-labelledby="schedule-title">
-      <div class="list-heading">
-        <div>
-          <p class="section-kicker">Maintenance calendar</p>
-          <h3 id="schedule-title">Upcoming service plans</h3>
-        </div>
-        <span class="plan-count">{{ plans().length }}</span>
-      </div>
-
-      <div class="schedule-list">
-        @for (plan of plans(); track plan.id) {
-          <article class="plan-card">
-            <div class="date-block" aria-label="Next service date">
-              <span>{{ plan.nextService.split(' ')[0] }}</span>
-              <small>{{ plan.nextService.split(' ')[1] }}</small>
-            </div>
-            <div class="plan-details">
-              <div class="plan-id-row">
-                <span class="plan-id">{{ plan.id }}</span>
-                <span class="status" [class]="plan.status.toLowerCase().replace(' ', '-')">{{
-                  plan.status
-                }}</span>
-              </div>
-              <h4>{{ plan.task }}</h4>
-              <p>{{ plan.asset }}</p>
-              <div class="plan-meta">
-                <span>{{ plan.cadence }}</span>
-                <span>Assigned to {{ plan.assignee }}</span>
-              </div>
+      <span>{{ selectedRecords().length }} งาน</span>
+    </div>
+    @if (selectedRecords().length === 0) {
+      <p class="empty-state">ยังไม่มีงาน PM ในวันนี้</p>
+    } @else {
+      <div class="selected-events">
+        @for (record of selectedRecords(); track record.id) {
+          <article>
+            <strong>{{ timeLabel(record) }}</strong>
+            <div>
+              <h3>{{ assetLabel(record) }}</h3>
+              <p>{{ record.details }}</p>
             </div>
           </article>
         }
       </div>
-    </section>
+    }
   </section>
+
+  @if (isFormOpen()) {
+    <div class="modal-backdrop" (click)="closeForm()">
+      <section
+        class="event-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="event-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="dialog-heading">
+          <div>
+            <p class="page-kicker">สร้างงานใหม่</p>
+            <h2 id="event-title">เพิ่มงาน PM</h2>
+          </div>
+          <button type="button" class="close-button" aria-label="ปิด" (click)="closeForm()">
+            ×
+          </button>
+        </div>
+
+        <form [formGroup]="planForm" (ngSubmit)="savePlan()">
+          <label>
+            เครื่องจักร
+            <select formControlName="assetId">
+              <option [ngValue]="0" disabled>เลือกเครื่องจักร</option>
+              @for (asset of assets(); track asset.id) {
+                <option [ngValue]="asset.id">
+                  {{ asset.equipment_code }} - {{ asset.location }}
+                </option>
+              }
+            </select>
+          </label>
+          <div class="date-time-row">
+            <label>
+              วันที่
+              <input type="date" formControlName="date" />
+            </label>
+            <label>
+              เวลา
+              <input type="time" formControlName="time" />
+            </label>
+          </div>
+          <div class="repeat-row">
+            <label>
+              ทำซ้ำ
+              <select formControlName="repeatInterval">
+                <option value="none">ไม่ทำซ้ำ</option>
+                <option value="daily">ทุกวัน</option>
+                <option value="weekly">ทุกสัปดาห์</option>
+                <option value="every15days">ทุก 15 วัน</option>
+                <option value="monthly">ทุกเดือน</option>
+                <option value="quarterly">ทุก 3 เดือน</option>
+                <option value="halfYearly">ทุก 6 เดือน</option>
+                <option value="yearly">ทุกปี</option>
+              </select>
+            </label>
+            <label>
+              จำนวนครั้ง
+              <input
+                type="number"
+                min="1"
+                max="366"
+                formControlName="repeatCount"
+                [disabled]="planForm.controls.repeatInterval.value === 'none'"
+              />
+            </label>
+          </div>
+          <label>
+            รายละเอียดงาน
+            <textarea
+              rows="4"
+              formControlName="details"
+              placeholder="ระบุรายการบำรุงรักษาเชิงป้องกัน"
+            ></textarea>
+          </label>
+
+          @if (errorMessage()) {
+            <div class="error-banner" role="alert">{{ errorMessage() }}</div>
+          }
+
+          <div class="dialog-actions">
+            <button type="button" class="secondary-button" (click)="closeForm()">ยกเลิก</button>
+            <button type="submit" class="primary-button" [disabled]="isSaving()">
+              {{ isSaving() ? 'กำลังบันทึก...' : 'บันทึกงาน PM' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading-overlay" role="status">กำลังโหลดงาน PM...</div>
+  }
 </div>

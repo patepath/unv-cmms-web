@@ -54,6 +54,18 @@
             <dd>{{ equipment.floor || '-' }}</dd>
           </div>
           <div>
+            <dt>พิกัด GPS</dt>
+            <dd class="gps-value">
+              @if (isLocating()) {
+                กำลังรับพิกัด...
+              } @else if (gpsCoordinates()) {
+                {{ gpsCoordinates() }}
+              } @else {
+                {{ gpsError() || 'ยังไม่มีพิกัด' }}
+              }
+            </dd>
+          </div>
+          <div>
             <dt>หมายเลขครุภัณฑ์</dt>
             <dd>{{ equipment.asset_no || '-' }}</dd>
           </div>

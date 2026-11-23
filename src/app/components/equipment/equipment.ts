@@ -23,6 +23,9 @@ export class Equipment {
   protected readonly hasRouteCode = signal(false);
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal('');
+  protected readonly gpsCoordinates = signal('');
+  protected readonly gpsError = signal('');
+  protected readonly isLocating = signal(false);
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -78,6 +81,7 @@ export class Equipment {
       next: (asset) => {
         this.asset.set(asset);
         this.isLoading.set(false);
+        this.loadGpsCoordinates();
       },
       error: (error: HttpErrorResponse) => {
         this.errorMessage.set(
@@ -88,5 +92,39 @@ export class Equipment {
         this.isLoading.set(false);
       },
     });
+  }
+
+  private loadGpsCoordinates(): void {
+    this.gpsCoordinates.set('');
+    this.gpsError.set('');
+
+    if (!navigator.geolocation) {
+      this.gpsError.set('อุปกรณ์ไม่รองรับ GPS');
+      return;
+    }
+
+    this.isLocating.set(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.gpsCoordinates.set(
+          `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
+        );
+        this.isLocating.set(false);
+      },
+      (error) => {
+        const messages: Record<number, string> = {
+          1: 'ผู้ใช้ไม่อนุญาตการเข้าถึงตำแหน่ง',
+          2: 'ไม่สามารถระบุตำแหน่งได้',
+          3: 'ขอพิกัดใช้เวลานานเกินไป',
+        };
+        this.gpsError.set(messages[error.code] ?? 'ไม่สามารถรับพิกัด GPS ได้');
+        this.isLocating.set(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 30000,
+      },
+    );
   }
 }

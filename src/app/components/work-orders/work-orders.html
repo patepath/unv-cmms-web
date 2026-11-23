@@ -1,108 +1,160 @@
-<div class="work-orders-page">
-  <section class="workspace-grid">
-    <form class="request-panel" [formGroup]="requestForm" (ngSubmit)="createWorkOrder()">
-      <div class="panel-heading">
-        <div>
-          <p class="section-kicker">New request</p>
-          <h3>Create work order</h3>
-        </div>
-        <span class="plus-mark" aria-hidden="true">+</span>
-      </div>
-
-      <label>
-        Request title
-        <input formControlName="title" placeholder="e.g. Check motor overheating" />
-      </label>
-      @if (requestForm.controls.title.invalid && requestForm.controls.title.touched) {
-        <small class="field-error">Add a title for this request.</small>
-      }
-
-      <label>
-        Asset or location
-        <input formControlName="asset" placeholder="e.g. Pump 04 / Building B" />
-      </label>
-      @if (requestForm.controls.asset.invalid && requestForm.controls.asset.touched) {
-        <small class="field-error">Add an asset or location.</small>
-      }
-
-      <div class="form-row">
-        <label>
-          Priority
-          <select formControlName="priority">
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-          </select>
-        </label>
-        <label>
-          Assign to
-          <select formControlName="assignee">
-            @for (technician of technicians; track technician) {
-              <option [value]="technician">{{ technician }}</option>
-            }
-          </select>
-        </label>
-      </div>
-
-      <button class="create-button" type="submit">
-        Create request <span aria-hidden="true">→</span>
+<div class="operative-page">
+  <header class="calendar-toolbar">
+    <div>
+      <p class="page-kicker">Work orders</p>
+      <h1>{{ calendarTitle() }}</h1>
+    </div>
+    <div class="toolbar-actions">
+      <button type="button" class="secondary-button" (click)="goToToday()">วันนี้</button>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="ช่วงก่อนหน้า"
+        (click)="previousPeriod()"
+      >
+        ‹
       </button>
-    </form>
-
-    <section class="list-panel" aria-labelledby="request-list-title">
-      <div class="list-heading">
-        <div>
-          <p class="section-kicker">Live queue</p>
-          <h3 id="request-list-title">Maintenance requests</h3>
-        </div>
-        <span class="queue-count">{{ filteredWorkOrders().length }}</span>
+      <button type="button" class="icon-button" aria-label="ช่วงถัดไป" (click)="nextPeriod()">
+        ›
+      </button>
+      <div class="view-switch" aria-label="รูปแบบปฏิทิน">
+        <button type="button" [class.active]="view() === 'week'" (click)="setView('week')">
+          สัปดาห์
+        </button>
+        <button type="button" [class.active]="view() === 'month'" (click)="setView('month')">
+          เดือน
+        </button>
       </div>
+      <button type="button" class="primary-button" (click)="openForm()">+ เพิ่มใบสั่งงาน</button>
+    </div>
+  </header>
 
-      <div class="status-tabs" role="tablist" aria-label="Filter work orders">
-        @for (status of statuses; track status) {
-          <button
-            type="button"
-            role="tab"
-            [class.selected]="selectedStatus() === status"
-            [attr.aria-selected]="selectedStatus() === status"
-            (click)="setStatus(status)"
-          >
-            {{ status }}
-          </button>
-        }
+  <section class="calendar" aria-label="ปฏิทินใบสั่งงาน">
+    <div class="weekdays">
+      @for (weekday of weekdays; track weekday) {
+        <div>{{ weekday }}</div>
+      }
+    </div>
+    <div class="calendar-grid" [class.week-view]="view() === 'week'">
+      @for (day of calendarDays(); track day.key) {
+        <button
+          type="button"
+          class="calendar-day"
+          [class.outside]="!day.isCurrentMonth"
+          [class.today]="day.isToday"
+          [class.selected]="selectedDate() === day.key"
+          (click)="selectDay(day)"
+        >
+          <span class="day-number">{{ day.number }}</span>
+          <span class="day-events">
+            @for (order of ordersForDate(day.key); track order.id) {
+              <span class="calendar-event" [class.high]="order.priority === 'High'">
+                <span class="event-time">{{ order.time }}</span>
+                <span>{{ order.title }}</span>
+              </span>
+            }
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="selected-day-panel">
+    <div class="selected-day-heading">
+      <div>
+        <p class="page-kicker">ใบสั่งงานที่เลือก</p>
+        <h2>{{ selectedDateLabel() }}</h2>
       </div>
-
-      <div class="request-list">
-        @for (workOrder of filteredWorkOrders(); track workOrder.id) {
-          <article class="request-card">
-            <div class="request-card-main">
-              <div class="request-id-row">
-                <span class="request-id">{{ workOrder.id }}</span>
-                <span class="priority" [class]="workOrder.priority.toLowerCase()">{{
-                  workOrder.priority
-                }}</span>
+      <span>{{ selectedOrders().length }} งาน</span>
+    </div>
+    @if (selectedOrders().length === 0) {
+      <p class="empty-state">ยังไม่มีใบสั่งงานในวันนี้</p>
+    } @else {
+      <div class="selected-events">
+        @for (order of selectedOrders(); track order.id) {
+          <article>
+            <strong>{{ order.time }}</strong>
+            <div>
+              <h3>{{ order.title }}</h3>
+              <p>{{ order.asset }} · {{ order.assignee }}</p>
+              <div class="order-meta">
+                <span class="priority" [class]="order.priority.toLowerCase()">
+                  {{ order.priority }}
+                </span>
+                <span>{{ order.status }}</span>
+                @if (order.status !== 'Completed') {
+                  <button type="button" (click)="advanceStatus(order)">เปลี่ยนสถานะ</button>
+                }
               </div>
-              <h4>{{ workOrder.title }}</h4>
-              <p class="asset-name">{{ workOrder.asset }}</p>
-              <p class="request-meta">Created {{ workOrder.created }} · {{ workOrder.assignee }}</p>
-            </div>
-            <div class="request-card-side">
-              <span class="status" [class]="workOrder.status.toLowerCase().replace(' ', '-')">{{
-                workOrder.status
-              }}</span>
-              @if (workOrder.status !== 'Completed') {
-                <button type="button" class="advance-button" (click)="advanceStatus(workOrder.id)">
-                  Advance <span aria-hidden="true">→</span>
-                </button>
-              } @else {
-                <span class="complete-mark" aria-label="Completed">✓</span>
-              }
             </div>
           </article>
-        } @empty {
-          <p class="empty-state">No work orders match this status.</p>
         }
       </div>
-    </section>
+    }
   </section>
+
+  @if (isFormOpen()) {
+    <div class="modal-backdrop" (click)="closeForm()">
+      <section
+        class="event-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="event-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="dialog-heading">
+          <div>
+            <p class="page-kicker">สร้างใบสั่งงาน</p>
+            <h2 id="event-title">เพิ่ม Work Order</h2>
+          </div>
+          <button type="button" class="close-button" aria-label="ปิด" (click)="closeForm()">
+            ×
+          </button>
+        </div>
+
+        <form [formGroup]="requestForm" (ngSubmit)="createWorkOrder()">
+          <label>
+            หัวข้องาน
+            <input formControlName="title" placeholder="เช่น ตรวจสอบมอเตอร์ร้อนผิดปกติ" />
+          </label>
+          <label>
+            เครื่องจักรหรือสถานที่
+            <input formControlName="asset" placeholder="เช่น Pump 04 / อาคาร B" />
+          </label>
+          <div class="date-time-row">
+            <label>
+              วันที่
+              <input type="date" formControlName="date" />
+            </label>
+            <label>
+              เวลา
+              <input type="time" formControlName="time" />
+            </label>
+          </div>
+          <div class="date-time-row">
+            <label>
+              ความสำคัญ
+              <select formControlName="priority">
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </label>
+            <label>
+              ผู้รับผิดชอบ
+              <select formControlName="assignee">
+                @for (technician of technicians; track technician) {
+                  <option [value]="technician">{{ technician }}</option>
+                }
+              </select>
+            </label>
+          </div>
+          <div class="dialog-actions">
+            <button type="button" class="secondary-button" (click)="closeForm()">ยกเลิก</button>
+            <button type="submit" class="primary-button">บันทึกใบสั่งงาน</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
 </div>
