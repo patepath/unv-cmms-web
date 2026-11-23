@@ -20,6 +20,10 @@ export class AssetService {
     return this.http.get<Asset[]>(`${this.assetUrl}category/${categoryId}`);
   }
 
+  getByEquipmentCode(equipmentCode: string): Observable<Asset> {
+    return this.http.get<Asset>(`${this.assetUrl}code/${encodeURIComponent(equipmentCode)}`);
+  }
+
   get(id: number): Observable<Asset> {
     return this.http.get<Asset>(`${this.assetUrl}${id}`);
   }

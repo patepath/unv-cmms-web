@@ -1,10 +1,19 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Asset, AssetDraft, Building } from '../../../interface';
+import { Asset, AssetDraft, Brand, Building, Category } from '../../../interface';
 import { AssetService } from '../../../services/asset.service';
 import { BuildingService } from '../../../services/building.service';
+import { BrandService } from '../../../services/brand.service';
+import { CategoryService } from '../../../services/category.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-asset-form',
@@ -13,12 +22,17 @@ import { BuildingService } from '../../../services/building.service';
   styleUrl: './asset-form.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AssetForm implements OnInit {
+export class AssetForm implements OnInit, OnDestroy {
   public buildings: Building[] = [];
+  public brands: Brand[] = [];
+  public categories: Category[] = [];
+  public selectedBuildingId = 0;
   public isSaving = false;
   public errorMessage = '';
   private assetId: number | null = null;
   private selectedCategoryId = 0;
+  private categorySubscription?: Subscription;
+  private brandSubscription?: Subscription;
 
   public assetForm = new FormGroup({
     id: new FormControl(0),
@@ -106,17 +120,42 @@ export class AssetForm implements OnInit {
     private route: ActivatedRoute,
     private assetService: AssetService,
     private buildingService: BuildingService,
+    private brandService: BrandService,
+    private categoryService: CategoryService,
+    private changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     const selectedCategoryId = Number(this.route.snapshot.queryParamMap.get('selectedCategoryId'));
     this.selectedCategoryId =
       Number.isInteger(selectedCategoryId) && selectedCategoryId > 0 ? selectedCategoryId : 0;
-    this.assetForm.patchValue({ category_id: this.selectedCategoryId });
 
-    this.buildingService.get().subscribe((buildings) => {
-      this.buildings = buildings;
+    this.buildingService.get().subscribe({
+      next: (buildings) => {
+        this.buildings = buildings;
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูลอาคารได้';
+        this.changeDetector.markForCheck();
+      },
     });
+
+    this.categoryService.get().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูลประเภทอุปกรณ์ได้';
+        this.changeDetector.markForCheck();
+      },
+    });
+
+    this.categorySubscription = this.assetForm.controls.category_id.valueChanges.subscribe(
+      (categoryId) => this.loadBrands(Number(categoryId)),
+    );
+    this.assetForm.patchValue({ category_id: this.selectedCategoryId });
 
     this.route.queryParamMap.subscribe((params) => {
       const id = Number(params.get('id'));
@@ -130,6 +169,11 @@ export class AssetForm implements OnInit {
         });
       }
     });
+  }
+
+  public ngOnDestroy(): void {
+    this.categorySubscription?.unsubscribe();
+    this.brandSubscription?.unsubscribe();
   }
 
   public save(): void {
@@ -170,16 +214,75 @@ export class AssetForm implements OnInit {
   private populateForm(asset: Asset): void {
     this.assetForm.patchValue({
       id: asset.id,
-      category_id: asset.category_id ?? 0,
       code: asset.asset_no,
       building_ids: asset.buildings.map((building) => building.id),
       location: asset.location,
       floor: asset.floor,
       no: asset.asset_no,
       tag: asset.asset_tag,
-      brand_id: asset.brand_id ?? 0,
       engine_model: asset.model,
       unit_number: Number(asset.unit_number) || 0,
+    });
+    this.assetForm.controls.category_id.setValue(asset.category_id ?? 0, { emitEvent: false });
+    this.loadBrands(asset.category_id ?? 0, asset.brand_id ?? 0);
+  }
+
+  public get selectedBuildings(): Building[] {
+    const selectedIds = new Set(this.assetForm.controls.building_ids.value ?? []);
+    return this.buildings
+      .filter((building) => selectedIds.has(building.id))
+      .sort((a, b) => a.code.localeCompare(b.code, 'th'));
+  }
+
+  public get availableBuildings(): Building[] {
+    const selectedIds = new Set(this.assetForm.controls.building_ids.value ?? []);
+    return this.buildings
+      .filter((building) => !selectedIds.has(building.id))
+      .sort((a, b) => a.code.localeCompare(b.code, 'th'));
+  }
+
+  public selectBuilding(event: Event): void {
+    this.selectedBuildingId = Number((event.target as HTMLSelectElement).value);
+  }
+
+  public addBuilding(): void {
+    if (!this.availableBuildings.some((building) => building.id === this.selectedBuildingId)) {
+      return;
+    }
+
+    const buildingIds = this.assetForm.controls.building_ids.value ?? [];
+    this.assetForm.controls.building_ids.setValue([...buildingIds, this.selectedBuildingId]);
+    this.selectedBuildingId = 0;
+  }
+
+  public removeBuilding(buildingId: number): void {
+    const buildingIds = this.assetForm.controls.building_ids.value ?? [];
+    this.assetForm.controls.building_ids.setValue(buildingIds.filter((id) => id !== buildingId));
+  }
+
+  private loadBrands(categoryId: number, preferredBrandId = 0): void {
+    this.brandSubscription?.unsubscribe();
+    this.assetForm.controls.brand_id.setValue(preferredBrandId, { emitEvent: false });
+    this.brands = [];
+
+    this.selectedCategoryId = Number.isInteger(categoryId) && categoryId > 0 ? categoryId : 0;
+    if (this.selectedCategoryId === 0) {
+      this.changeDetector.markForCheck();
+      return;
+    }
+
+    this.brandSubscription = this.brandService.getByCategory(this.selectedCategoryId).subscribe({
+      next: (brands) => {
+        this.brands = [...brands].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+        if (!this.brands.some((brand) => brand.id === preferredBrandId)) {
+          this.assetForm.controls.brand_id.setValue(0, { emitEvent: false });
+        }
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูลยี่ห้อได้';
+        this.changeDetector.markForCheck();
+      },
     });
   }
 

@@ -9,7 +9,12 @@
       </select>
     </div>
 
-    <button class="add-button ms-1" type="button" [routerLink]="['/admin/brand-form']">
+    <button
+      class="add-button ms-1"
+      type="button"
+      [routerLink]="['/admin/brand-form']"
+      [queryParams]="{ selectedCategoryId: selectedCategoryId || null }"
+    >
       <span aria-hidden="true">+</span> เพิ่มยี่ห้อ
     </button>
   </div>

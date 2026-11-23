@@ -13,4 +13,19 @@ export class BuildingService {
   get(): Observable<Building[]> {
     return this.http.get<Building[]>(`${environment.apiUrl}/building/`);
   }
+
+  getByCode(code: string): Observable<Building> {
+    return this.http.get<Building>(`${environment.apiUrl}/building/${encodeURIComponent(code)}`);
+  }
+
+  create(building: Pick<Building, 'code' | 'name'>): Observable<Building> {
+    return this.http.post<Building>(`${environment.apiUrl}/building/`, building);
+  }
+
+  update(originalCode: string, building: Pick<Building, 'code' | 'name'>): Observable<Building> {
+    return this.http.put<Building>(
+      `${environment.apiUrl}/building/${encodeURIComponent(originalCode)}`,
+      building,
+    );
+  }
 }

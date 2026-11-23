@@ -3,20 +3,9 @@
     <div class="form-group">
       <select class="form-select" [value]="selectedCategoryId" (change)="search($event)">
         <option value="0">ทุกหมวดหมู่</option>
-        <option value="1">หม้อแปลง</option>
-        <option value="2">ตู้ไฟฟ้า</option>
-        <option value="3">เครื่องกำเนิดไฟฟ้า</option>
-        <option value="4">ปั้มส่งน้ำ</option>
-        <option value="5">ปั้มเพิ่มแรงดัน</option>
-        <option value="6">ปั้มดับเพลิง</option>
-        <option value="7">ปั้มเติมอากาศ</option>
-        <option value="8">ปั้มจุ่ม</option>
-        <option value="9">กังหันตีน้ำ</option>
-        <option value="10">สปริงเกอร์</option>
-        <option value="11">สูบน้ำระบบเครื่องยนต์</option>
-        <option value="12">สูบน้ำระบบไฟฟ้า</option>
-        <option value="13">แจ้งเหตุเพลิงไหม้</option>
-        <option value="14">ดับเพลิงชะลอน้ำ</option>
+        @for (category of categories; track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
       </select>
     </div>
 

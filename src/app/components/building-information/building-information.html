@@ -1,33 +1,32 @@
 <div class="container-fluid overflow-auto">
   <div class="d-flex flex-row">
     <button class="add-button ms-1" type="button" [routerLink]="['/admin/building-form']">
-      <span aria-hidden="true">+</span> เพิ่มอาคาร    
+      <span aria-hidden="true">+</span> เพิ่มอาคาร
     </button>
   </div>
 
   <div class="table-responsive mt-3">
-      <table id="setting-building-table" class="table table-bordered mb-3">
-          <caption></caption>
+    <table id="setting-building-table" class="table table-bordered mb-3">
+      <caption></caption>
 
-          <thead>
-              <tr>
-                  @for (header of dataTable.headerRow; track $index) {
-                      <th>{{ header }}</th>
-                  }
-              </tr>
-          </thead>
+      <thead>
+        <tr>
+          @for (header of dataTable.headerRow; track $index) {
+            <th>{{ header }}</th>
+          }
+        </tr>
+      </thead>
 
-          <tbody>
-              @for (row of dataTable.dataRows; track $index) {
-                  <tr>
-                      <td>{{ $index + 1 }}</td>
-                      @for (cell of row; track $index) {
-                          <td>{{ cell }}</td>
-                      }
-                  </tr>
-              }
-          </tbody>
-      </table>
+      <tbody>
+        @for (row of dataTable.dataRows; track $index) {
+          <tr>
+            @for (cell of row; track $index) {
+              <td>{{ cell }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
   </div>
   <!--
   <div class="page-heading">

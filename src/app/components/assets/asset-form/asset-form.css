@@ -54,10 +54,25 @@ form {
   gap: 15px;
 }
 
+.building-selector {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.building-selector .form-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.building-add-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .form-row {
   align-items: start;
 }
-
 
 input[readonly] {
   color: #73817b;

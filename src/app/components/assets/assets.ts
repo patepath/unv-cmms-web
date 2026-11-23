@@ -8,10 +8,11 @@ import {
 } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Asset, DataTable } from '../../interface';
+import { Asset, Category, DataTable } from '../../interface';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AssetService } from '../../services/asset.service';
 import { Subscription } from 'rxjs';
+import { CategoryService } from '../../services/category.service';
 
 declare let $: any;
 
@@ -27,6 +28,7 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
   public data!: string[][];
   public errorMessage = '';
   public selectedCategoryId = 0;
+  public categories: Category[] = [];
   private assets: Asset[] = [];
   private displayedAssets: Asset[] = [];
   private tableInitialized = false;
@@ -34,6 +36,7 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private assetService: AssetService,
+    private categoryService: CategoryService,
     private router: Router,
     private route: ActivatedRoute,
     private changeDetector: ChangeDetectorRef,
@@ -69,6 +72,16 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
     const selectedCategoryId = Number(this.route.snapshot.queryParamMap.get('selectedCategoryId'));
     this.selectedCategoryId =
       Number.isInteger(selectedCategoryId) && selectedCategoryId > 0 ? selectedCategoryId : 0;
+    this.categoryService.get().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูลหมวดหมู่ได้';
+        this.changeDetector.markForCheck();
+      },
+    });
     this.loadAssets();
   }
 
@@ -167,8 +180,8 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
       const buildings = asset.buildings ?? [];
       return [
         String(asset.equipment_code),
-        buildings.map((building) => building.code).join(', ') || '-',
-        buildings.map((building) => building.name).join(', ') || '-',
+        this.joinBuildingValues(buildings.map((building) => building.code)),
+        this.joinBuildingValues(buildings.map((building) => building.name)),
         asset.location,
         asset.floor,
         asset.asset_no,
@@ -178,6 +191,11 @@ export class Assets implements OnInit, AfterViewInit, OnDestroy {
     });
     this.dataTable.dataRows = this.data;
     this.refreshTable();
+  }
+
+  private joinBuildingValues(values: string[]): string {
+    const nonEmptyValues = values.map((value) => value?.trim()).filter(Boolean);
+    return nonEmptyValues.length > 0 ? nonEmptyValues.join(', ') : '-';
   }
 
   private refreshTable(): void {

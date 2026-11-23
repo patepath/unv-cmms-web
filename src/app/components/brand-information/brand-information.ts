@@ -5,7 +5,7 @@ import {
   Component,
   OnInit,
 } from '@angular/core';
-import { Category, DataTable } from '../../interface';
+import { Brand, Category, DataTable } from '../../interface';
 import { BrandService } from '../../services/brand.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
@@ -27,6 +27,7 @@ export class BrandInformation implements OnInit, AfterViewInit {
   public selectedCategoryId = 0;
   public errorMessage = '';
   private tableInitialized = false;
+  private displayedBrands: Brand[] = [];
 
   constructor(
     private brandService: BrandService,
@@ -72,7 +73,7 @@ export class BrandInformation implements OnInit, AfterViewInit {
     let self = this;
 
     let table = $('#setting-brand-table').DataTable({
-      dom: 'frtip',
+      dom: 'Bfrtip',
       buttons: ['copy', 'csv', 'excel', 'print'],
       columnDefs: [{ target: [0], width: '15em' }],
       responsive: true,
@@ -95,8 +96,17 @@ export class BrandInformation implements OnInit, AfterViewInit {
       $(this).css('font-weight', 'normal');
     });
 
-    table.on('click', 'td', function (this: any) {
-      //self.edit(table.row(this).index());
+    table.on('click', 'tbody tr', (event: Event) => {
+      const rowIndex = table.row(event.currentTarget).index();
+      const brand = this.displayedBrands[rowIndex];
+      if (brand) {
+        void this.router.navigate(['/admin/brand-form'], {
+          queryParams: {
+            id: brand.id,
+            selectedCategoryId: this.selectedCategoryId || null,
+          },
+        });
+      }
     });
 
     //self.search();
@@ -126,15 +136,14 @@ export class BrandInformation implements OnInit, AfterViewInit {
 
     request.subscribe({
       next: (brands) => {
-        this.data = [...brands]
-          .sort((a, b) => {
-            const categoryCompare = (a.category?.name ?? '').localeCompare(
-              b.category?.name ?? '',
-              'th',
-            );
-            return categoryCompare || a.name.localeCompare(b.name, 'th');
-          })
-          .map((brand) => [brand.category?.name ?? '-', brand.name]);
+        this.displayedBrands = [...brands].sort((a, b) => {
+          const categoryCompare = (a.category?.name ?? '').localeCompare(
+            b.category?.name ?? '',
+            'th',
+          );
+          return categoryCompare || a.name.localeCompare(b.name, 'th');
+        });
+        this.data = this.displayedBrands.map((brand) => [brand.category?.name ?? '-', brand.name]);
 
         this.dataTable.dataRows = this.data;
         this.refreshTable();

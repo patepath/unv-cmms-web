@@ -1,0 +1,91 @@
+<main class="equipment-page">
+  <header class="equipment-header">
+    <p class="eyebrow">ข้อมูลเครื่องจักร</p>
+  </header>
+
+  <form class="equipment-search mb-2" (submit)="submitSearch($event)">
+    <label for="equipment-code">รหัสเครื่องจักร</label>
+    <div class="search-row">
+      <input
+        id="equipment-code"
+        type="text"
+        autocomplete="off"
+        [value]="equipmentCode()"
+        (input)="updateEquipmentCode($event)"
+        placeholder="เช่น TP-N201"
+      />
+      <button type="submit">ค้นหา</button>
+    </div>
+  </form>
+
+  @if (isLoading()) {
+    <div class="status-card" role="status">กำลังโหลดข้อมูลเครื่องจักร...</div>
+  } @else if (errorMessage()) {
+    <div class="status-card error" role="alert">
+      <p>{{ errorMessage() }}</p>
+      <button type="button" (click)="reload()">ลองอีกครั้ง</button>
+    </div>
+  } @else if (asset(); as equipment) {
+    <section class="equipment-list" aria-label="รายละเอียดเครื่องจักร">
+      <article class="equipment-card">
+        <div class="card-heading">
+          <div>
+            <span class="category">{{ equipment.category.name || 'ไม่ระบุหมวดหมู่' }}</span>
+            <h2>{{ equipment.equipment_code }}</h2>
+          </div>
+          <span class="status">{{ equipment.status || 'ACTIVE' }}</span>
+        </div>
+
+        <dl>
+          <div>
+            <dt>รหัสอาคาร</dt>
+            <dd>{{ buildingCodes(equipment) }}</dd>
+          </div>
+          <div>
+            <dt>ชื่ออาคาร</dt>
+            <dd>{{ buildingNames(equipment) }}</dd>
+          </div>
+          <div>
+            <dt>สถานที่ติดตั้ง</dt>
+            <dd>{{ equipment.location || '-' }}</dd>
+          </div>
+          <div>
+            <dt>ชั้น</dt>
+            <dd>{{ equipment.floor || '-' }}</dd>
+          </div>
+          <div>
+            <dt>หมายเลขครุภัณฑ์</dt>
+            <dd>{{ equipment.asset_no || '-' }}</dd>
+          </div>
+          <div>
+            <dt>Asset Tag</dt>
+            <dd>{{ equipment.asset_tag || '-' }}</dd>
+          </div>
+          <div>
+            <dt>ยี่ห้อ</dt>
+            <dd>{{ equipment.brand.name || '-' }}</dd>
+          </div>
+        </dl>
+
+        <div class="maintenance-actions">
+          <a
+            class="maintenance-button pm-button"
+            [routerLink]="['/admin/preventive-maintenance']"
+            [queryParams]="{ equipmentCode: equipment.equipment_code }"
+          >
+            ทำ PM
+          </a>
+          <a
+            class="maintenance-button om-button"
+            [routerLink]="['/admin/operative-maintenance']"
+            [queryParams]="{ equipmentCode: equipment.equipment_code }"
+          >
+            ทำ OM
+          </a>
+        </div>
+      </article>
+    </section>
+  } @else if (!hasRouteCode()) {
+    <div class="status-card">กรอกรหัสเครื่องจักรเพื่อค้นหา</div>
+  }
+</main>
