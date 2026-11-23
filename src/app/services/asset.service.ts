@@ -13,9 +13,11 @@ export class AssetService {
   readonly assets = this.assetState.asReadonly();
 
   retrieveAssets(): Observable<Asset[]> {
-    return this.http.get<Asset[]>(this.assetUrl).pipe(
-      tap((assets) => this.assetState.set(assets)),
-    );
+    return this.http.get<Asset[]>(this.assetUrl).pipe(tap((assets) => this.assetState.set(assets)));
+  }
+
+  retrieveAssetsByCategory(categoryId: number): Observable<Asset[]> {
+    return this.http.get<Asset[]>(`${this.assetUrl}category/${categoryId}`);
   }
 
   get(id: number): Observable<Asset> {
@@ -23,23 +25,24 @@ export class AssetService {
   }
 
   create(draft: AssetDraft): Observable<Asset> {
-    return this.http.post<Asset>(this.assetUrl, draft).pipe(
-      tap((asset) => this.assetState.update((assets) => [asset, ...assets])),
-    );
+    return this.http
+      .post<Asset>(this.assetUrl, draft)
+      .pipe(tap((asset) => this.assetState.update((assets) => [asset, ...assets])));
   }
 
   update(id: number, draft: AssetDraft): Observable<Asset> {
-    return this.http.put<Asset>(`${this.assetUrl}${id}`, draft).pipe(
-      tap((asset) =>
-        this.assetState.update((assets) =>
-          assets.map((current) => (current.id === id ? asset : current)),
+    return this.http
+      .put<Asset>(`${this.assetUrl}${id}`, draft)
+      .pipe(
+        tap((asset) =>
+          this.assetState.update((assets) =>
+            assets.map((current) => (current.id === id ? asset : current)),
+          ),
         ),
-      ),
-    );
+      );
   }
 
   delete(id: number): void {
     this.assetState.update((assets) => assets.filter((asset) => asset.id !== id));
   }
-
 }

@@ -113,6 +113,7 @@ export type SpecPaddleWheel = {
 
 export type Asset = {
   id: number;
+  equipment_code: string;
   category_id: number | null;
   category: Category;
   location: string;

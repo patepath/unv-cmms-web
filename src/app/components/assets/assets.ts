@@ -1,11 +1,19 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { Asset, DataTable } from '../../interface';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AssetService } from '../../services/asset.service';
+import { Subscription } from 'rxjs';
 
-declare let $:any;
+declare let $: any;
 
 @Component({
   selector: 'app-assets',
@@ -14,128 +22,157 @@ declare let $:any;
   styleUrl: './assets.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Assets implements OnInit, AfterViewInit {
-	public dataTable!: DataTable;
-	public data!: string[][];
-	public errorMessage = '';
-	public selectedCategoryId = 0;
-	private assets: Asset[] = [];
-	private displayedAssets: Asset[] = [];
-	private tableInitialized = false;
+export class Assets implements OnInit, AfterViewInit, OnDestroy {
+  public dataTable!: DataTable;
+  public data!: string[][];
+  public errorMessage = '';
+  public selectedCategoryId = 0;
+  private assets: Asset[] = [];
+  private displayedAssets: Asset[] = [];
+  private tableInitialized = false;
+  private assetRequest?: Subscription;
 
-	constructor(
-		private assetService: AssetService,
-		private router: Router,
-	) {
-		this.dataTable = {
-			headerRow: ['Equipment ID.', 'Building No.', 'Building Name', 'สถานที่ติดตั้ง', 'ชั้น', 'หมายเลขครุภัณฑ์', 'Asset Tag', 'ยี่ห้อ'],
-			footerRow: ['Equipment ID.', 'Building No.', 'Building Name', 'สถานที่ติดตั้ง', 'ชั้น', 'หมายเลขครุภัณฑ์', 'Asset Tag', 'ยี่ห้อ'],
-			dataRows: [],
-		};
+  constructor(
+    private assetService: AssetService,
+    private router: Router,
+    private changeDetector: ChangeDetectorRef,
+  ) {
+    this.dataTable = {
+      headerRow: [
+        'Equipment ID.',
+        'Building No.',
+        'Building Name',
+        'สถานที่ติดตั้ง',
+        'ชั้น',
+        'หมายเลขครุภัณฑ์',
+        'Asset Tag',
+        'ยี่ห้อ',
+      ],
+      footerRow: [
+        'Equipment ID.',
+        'Building No.',
+        'Building Name',
+        'สถานที่ติดตั้ง',
+        'ชั้น',
+        'หมายเลขครุภัณฑ์',
+        'Asset Tag',
+        'ยี่ห้อ',
+      ],
+      dataRows: [],
+    };
 
-		this.data = [];
-	}
+    this.data = [];
+  }
 
-	public ngOnInit(): void {
-		this.assetService.retrieveAssets().subscribe({
-			next: (assets) => this.setAssetRows(assets),
-			error: (error: HttpErrorResponse) => {
-				this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูล asset ได้';
-			},
-		});
-	}
+  public ngOnInit(): void {
+    this.loadAssets();
+  }
 
-	public ngAfterViewInit(): void {
-		this.initTable();
-		this.tableInitialized = true;
-		this.refreshTable();
-	}
+  public ngOnDestroy(): void {
+    this.assetRequest?.unsubscribe();
+  }
 
- 	initTable() {
-		const table = $('#setting-user-table').DataTable({
-			dom: 'Bfrtip',
-			buttons: ['copy', 'csv', 'excel', 'print'],
-			columnDefs: [
-				{ target: [0, 1], width: '18em', className: 'dt-center' },
-			],
-			responsive: true,
-			language: {
-				search: "_INPUT_",
-				searchPlaceholder: "Search records",
-			},
-			ordering: false,
-			paging: true,
-			pageLength: 15,
-			pagingType: "full_numbers",
-		});
+  private loadAssets(): void {
+    this.assetRequest?.unsubscribe();
+    const request =
+      this.selectedCategoryId === 0
+        ? this.assetService.retrieveAssets()
+        : this.assetService.retrieveAssetsByCategory(this.selectedCategoryId);
 
-		table.on('mouseover', 'tr', function(this: any) {
-			$(this).css('cursor', 'pointer');
-			$(this).css('font-weight', 'bold');
-		});
+    this.assetRequest = request.subscribe({
+      next: (assets) => {
+        this.setAssetRows(assets);
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูล asset ได้';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
 
-		table.on('mouseout', 'tr', function(this: any) {
-			$(this).css('font-weight', 'normal');
-		});
+  public ngAfterViewInit(): void {
+    this.initTable();
+    this.tableInitialized = true;
+    this.refreshTable();
+  }
 
-		table.on('click', 'tbody tr', (event: Event) => {
-			const rowIndex = table.row(event.currentTarget).index();
-			const asset = this.displayedAssets[rowIndex];
-			if (asset) {
-				this.router.navigate(['/admin/asset-form'], {
-					queryParams: { id: asset.id },
-				});
-			}
-		});
-	} 
+  initTable() {
+    const table = $('#setting-user-table').DataTable({
+      dom: 'Bfrtip',
+      buttons: ['copy', 'csv', 'excel', 'print'],
+      columnDefs: [
+        { target: [0], width: '8em', className: 'dt-center' },
+        { target: [3], width: '25em' },
+      ],
+      responsive: true,
+      language: {
+        search: '_INPUT_',
+        searchPlaceholder: 'Search records',
+      },
+      ordering: false,
+      paging: true,
+      pageLength: 10,
+      pagingType: 'full_numbers',
+    });
 
-	private setAssetRows(assets: Asset[]): void {
-		this.assets = assets;
-		this.applyCategoryFilter();
-	}
+    table.on('mouseover', 'tr', function (this: any) {
+      $(this).css('cursor', 'pointer');
+      $(this).css('font-weight', 'bold');
+    });
 
-	public search(event: Event): void {
-		const categoryId = Number((event.target as HTMLSelectElement).value);
-		this.selectedCategoryId = Number.isNaN(categoryId) ? 0 : categoryId;
-		this.errorMessage = '';
-		this.assetService.retrieveAssets().subscribe({
-			next: (assets) => this.setAssetRows(assets),
-			error: (error: HttpErrorResponse) => {
-				this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูล asset ได้';
-			},
-		});
-	}
+    table.on('mouseout', 'tr', function (this: any) {
+      $(this).css('font-weight', 'normal');
+    });
 
-	private applyCategoryFilter(): void {
-		this.displayedAssets = this.selectedCategoryId === 0
-			? this.assets
-			: this.assets.filter((asset) => {
-				const categoryId = Number(asset.category_id || asset.category?.id);
-				return categoryId === this.selectedCategoryId;
-			});
+    table.on('click', 'tbody tr', (event: Event) => {
+      const rowIndex = table.row(event.currentTarget).index();
+      const asset = this.displayedAssets[rowIndex];
+      if (asset) {
+        this.router.navigate(['/admin/asset-form'], {
+          queryParams: { id: asset.id },
+        });
+      }
+    });
+  }
 
-		this.data = this.displayedAssets.map((asset) => {
-			const buildings = asset.buildings ?? [];
-			return [
-				String(asset.id),
-				buildings.map((building) => building.code).join(', ') || '-',
-				buildings.map((building) => building.name).join(', ') || '-',
-				asset.location,
-				asset.floor,
-				asset.asset_no,
-				asset.asset_tag,
-				asset.brand?.name ?? '-',
-			];
-		});
-		this.dataTable.dataRows = this.data;
-		this.refreshTable();
-	}
+  private setAssetRows(assets: Asset[]): void {
+    this.assets = assets;
+    this.applyCategoryFilter();
+  }
 
-	private refreshTable(): void {
-		if (!this.tableInitialized) {
-			return;
-		}
+  public search(event: Event): void {
+    const categoryId = Number((event.target as HTMLSelectElement).value);
+    this.selectedCategoryId = Number.isNaN(categoryId) ? 0 : categoryId;
+    this.errorMessage = '';
+    this.loadAssets();
+  }
 
-		$('#setting-user-table').DataTable().clear().rows.add(this.data).draw();
-	}
+  private applyCategoryFilter(): void {
+    this.displayedAssets = this.assets;
+
+    this.data = this.displayedAssets.map((asset) => {
+      const buildings = asset.buildings ?? [];
+      return [
+        String(asset.equipment_code),
+        buildings.map((building) => building.code).join(', ') || '-',
+        buildings.map((building) => building.name).join(', ') || '-',
+        asset.location,
+        asset.floor,
+        asset.asset_no,
+        asset.asset_tag,
+        asset.brand?.name ?? '-',
+      ];
+    });
+    this.dataTable.dataRows = this.data;
+    this.refreshTable();
+  }
+
+  private refreshTable(): void {
+    if (!this.tableInitialized) {
+      return;
+    }
+
+    $('#setting-user-table').DataTable().clear().rows.add(this.data).draw();
+  }
 }
