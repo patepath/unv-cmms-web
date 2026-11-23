@@ -1,9 +1,17 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { Brand, DataTable } from '../../interface';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+} from '@angular/core';
+import { Category, DataTable } from '../../interface';
 import { BrandService } from '../../services/brand.service';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { CategoryService } from '../../services/category.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
-declare let $:any;
+declare let $: any;
 
 @Component({
   selector: 'app-brand-information',
@@ -13,68 +21,135 @@ declare let $:any;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BrandInformation implements OnInit, AfterViewInit {
-	public dataTable!: DataTable;
-	public data!: string[][];
+  public dataTable!: DataTable;
+  public data!: string[][];
+  public categories: Category[] = [];
+  public selectedCategoryId = 0;
+  public errorMessage = '';
+  private tableInitialized = false;
 
-	constructor(private brandService: BrandService) {
-		this.dataTable = {
-			headerRow: ['ชื่อยี่ห้อ'],
-			footerRow: ['ชื่อยี่ห้อ'],
-			dataRows: [],
-		};
+  constructor(
+    private brandService: BrandService,
+    private categoryService: CategoryService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private changeDetector: ChangeDetectorRef,
+  ) {
+    this.dataTable = {
+      headerRow: ['หมวดหมู่', 'ชื่อยี่ห้อ'],
+      footerRow: ['หมวดหมู่', 'ชื่อยี่ห้อ'],
+      dataRows: [],
+    };
 
-		this.data = [];
-	}
+    this.data = [];
+  }
 
-	ngOnInit(): void {
-		this.search();
-	}
+  ngOnInit(): void {
+    const selectedCategoryId = Number(this.route.snapshot.queryParamMap.get('selectedCategoryId'));
+    this.selectedCategoryId =
+      Number.isInteger(selectedCategoryId) && selectedCategoryId > 0 ? selectedCategoryId : 0;
 
-	ngAfterViewInit(): void {
-		this.initTable();
-	}
+    this.categoryService.get().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูลหมวดหมู่ได้';
+        this.changeDetector.markForCheck();
+      },
+    });
+    this.loadBrands();
+  }
 
- 	initTable() {
-		let self = this;
+  ngAfterViewInit(): void {
+    this.initTable();
+    this.tableInitialized = true;
+    this.refreshTable();
+  }
 
-		let table = $('#setting-brand-table').DataTable({
-			dom: 'frtip',
-			buttons: ['copy', 'csv', 'excel', 'print'],
-			columnDefs: [],
-			responsive: true,
-			language: {
-				search: "_INPUT_",
-				searchPlaceholder: "Search records",
-			},
-			ordering: false,
-			paging: true,
-			pageLength: 15,
-			pagingType: "full_numbers",
-		});
+  initTable() {
+    let self = this;
 
-		table.on('mouseover', 'tr', function(this: any) {
-			$(this).css('cursor', 'pointer');
-			$(this).css('font-weight', 'bold');
-		});
+    let table = $('#setting-brand-table').DataTable({
+      dom: 'frtip',
+      buttons: ['copy', 'csv', 'excel', 'print'],
+      columnDefs: [{ target: [0], width: '15em' }],
+      responsive: true,
+      language: {
+        search: '_INPUT_',
+        searchPlaceholder: 'Search records',
+      },
+      ordering: false,
+      paging: true,
+      pageLength: 15,
+      pagingType: 'full_numbers',
+    });
 
-		table.on('mouseout', 'tr', function(this: any) {
-			$(this).css('font-weight', 'normal');
-		});
+    table.on('mouseover', 'tr', function (this: any) {
+      $(this).css('cursor', 'pointer');
+      $(this).css('font-weight', 'bold');
+    });
 
-		table.on('click', 'td', function(this: any) {
-			//self.edit(table.row(this).index());
-		});
+    table.on('mouseout', 'tr', function (this: any) {
+      $(this).css('font-weight', 'normal');
+    });
 
-		//self.search();
-	} 
+    table.on('click', 'td', function (this: any) {
+      //self.edit(table.row(this).index());
+    });
 
-	search() {
-		this.brandService.get().subscribe(rs => {
-			this.data = rs.map(b => [b.name]);
+    //self.search();
+  }
 
-			this.dataTable.dataRows = this.data;
-			// Refresh the table with new data
-			$('#setting-brand-table').DataTable().clear().rows.add(this.data).draw();
-		});
-	}
+  search() {
+    this.loadBrands();
+  }
+
+  selectCategory(event: Event): void {
+    const categoryId = Number((event.target as HTMLSelectElement).value);
+    this.selectedCategoryId = Number.isInteger(categoryId) && categoryId > 0 ? categoryId : 0;
+    this.errorMessage = '';
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { selectedCategoryId: this.selectedCategoryId || null },
+      replaceUrl: true,
+    });
+    this.loadBrands();
+  }
+
+  private loadBrands(): void {
+    const request =
+      this.selectedCategoryId === 0
+        ? this.brandService.get()
+        : this.brandService.getByCategory(this.selectedCategoryId);
+
+    request.subscribe({
+      next: (brands) => {
+        this.data = [...brands]
+          .sort((a, b) => {
+            const categoryCompare = (a.category?.name ?? '').localeCompare(
+              b.category?.name ?? '',
+              'th',
+            );
+            return categoryCompare || a.name.localeCompare(b.name, 'th');
+          })
+          .map((brand) => [brand.category?.name ?? '-', brand.name]);
+
+        this.dataTable.dataRows = this.data;
+        this.refreshTable();
+        this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorMessage = error.error?.error ?? 'ไม่สามารถโหลดข้อมูลยี่ห้อได้';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  private refreshTable(): void {
+    if (this.tableInitialized) {
+      $('#setting-brand-table').DataTable().clear().rows.add(this.data).draw();
+    }
+  }
 }

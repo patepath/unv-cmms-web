@@ -19,6 +19,8 @@ export type Building = {
 
 export type Brand = {
   id: number;
+  category_id: number | null;
+  category: Category;
   name: string;
 };
 

@@ -1,36 +1,48 @@
 <div class="container-fluid overflow-auto">
   <div class="d-flex flex-row">
+    <div class="form-group">
+      <select class="form-select" [value]="selectedCategoryId" (change)="selectCategory($event)">
+        <option value="0">ทุกหมวดหมู่</option>
+        @for (category of categories; track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </div>
+
     <button class="add-button ms-1" type="button" [routerLink]="['/admin/brand-form']">
-      <span aria-hidden="true">+</span> เพิ่มยี่ห้อ    
+      <span aria-hidden="true">+</span> เพิ่มยี่ห้อ
     </button>
   </div>
 
+  @if (errorMessage) {
+    <div class="alert alert-danger mt-3" role="alert">{{ errorMessage }}</div>
+  }
+
   <div class="table-responsive mt-3">
     <table id="setting-brand-table" class="table table-bordered mb-3">
-        <caption></caption>
+      <caption></caption>
 
-        <thead>
-            <tr>
-                @for (header of dataTable.headerRow; track $index) {
-                    <th>{{ header }}</th>
-                }
-            </tr>
-        </thead>
+      <thead>
+        <tr>
+          @for (header of dataTable.headerRow; track $index) {
+            <th>{{ header }}</th>
+          }
+        </tr>
+      </thead>
 
-        <tbody>
-            @for (row of dataTable.dataRows; track $index) {
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    @for (cell of row; track $index) {
-                        <td>{{ cell }}</td>
-                    }
-                </tr>
+      <tbody>
+        @for (row of dataTable.dataRows; track $index) {
+          <tr>
+            @for (cell of row; track $index) {
+              <td>{{ cell }}</td>
             }
-        </tbody>
+          </tr>
+        }
+      </tbody>
     </table>
-</div>
+  </div>
 
-<!--
+  <!--
 <section class="brand-page">
   <div class="page-heading">
     <div>
@@ -70,4 +82,4 @@
     }
   </section>
 </section>
--->
+--></div>

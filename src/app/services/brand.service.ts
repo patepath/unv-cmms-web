@@ -13,4 +13,8 @@ export class BrandService {
   get(): Observable<Brand[]> {
     return this.http.get<Brand[]>(`${environment.apiUrl}/brand/`);
   }
+
+  getByCategory(categoryId: number): Observable<Brand[]> {
+    return this.http.get<Brand[]>(`${environment.apiUrl}/brand/category/${categoryId}`);
+  }
 }
